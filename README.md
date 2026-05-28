@@ -107,6 +107,38 @@ Kein Terminal oder Python nötig für den Setup-Prozess.
 
 ---
 
+## Logs & Diagnose
+
+**Live-Logs anzeigen:**
+```bash
+docker logs webex-vacation-bot -f
+```
+
+**Setup-Passwort aus den Logs lesen** (nur beim ersten Start sichtbar):
+```bash
+docker logs webex-vacation-bot 2>&1 | grep "SETUP WIZARD PASSWORD"
+```
+
+**Letzten 50 Zeilen anzeigen:**
+```bash
+docker logs webex-vacation-bot --tail 50
+```
+
+**Auf Synology (Container Manager):**
+Container auswählen → Tab "Log" → Logs werden live angezeigt.
+
+**Auf QNAP (Container Station):**
+Container auswählen → "Protokoll" → live oder als Datei exportieren.
+
+**Was du in den Logs siehst:**
+- `Poll result:` — Ergebnis jedes 15-Minuten-Checks
+- `Replied to:` — wer eine Antwort bekommen hat
+- `vacation ended — auto-disabled` — Bot hat sich automatisch deaktiviert
+- `Token refresh` — Webex-Token wurde erneuert (normal)
+- `SETUP WIZARD PASSWORD` — einmalig beim ersten Start wenn kein Passwort gesetzt
+
+---
+
 ## Bot stoppen / Urlaub beenden
 
 ```bash
