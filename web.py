@@ -5,22 +5,63 @@ Routes:
   GET /          → renders index.html via Jinja2
   GET /api/status → JSON status payload
   GET /health    → 200 OK liveness probe
+
+  GET  /setup                  → setup wizard step 1
+  POST /setup/step1            → save Webex OAuth credentials, redirect to auth
+  GET  /setup/webex/auth       → redirect browser to Webex OAuth
+  GET  /setup/webex/callback   → receive OAuth code, exchange for tokens
+  GET  /setup/step2            → vacation settings form
+  POST /setup/step2            → save vacation settings
+  GET  /setup/step3            → optional settings form
+  POST /setup/step3            → save optional settings
+  GET  /setup/summary          → review all config
 """
 import os
 import json
+import time
 import logging
 from pathlib import Path
 
 import aiohttp_jinja2
 import jinja2
+import httpx
 from aiohttp import web
 
+import aiosqlite
 import db
 
 logger = logging.getLogger(__name__)
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
+# Same path logic as auth.py uses
+_DB_PATH = os.getenv("SQLITE_PATH", "/data/vacation.db")
+TOKENS_PATH = Path(_DB_PATH).parent / "tokens.json"
+
+
+# ---------------------------------------------------------------------------
+# Helper
+# ---------------------------------------------------------------------------
+
+def _get_base_url(request: web.Request) -> str:
+    """Derive the base URL from the incoming request Host header."""
+    host = request.headers.get("Host", "localhost:8080")
+    scheme = request.url.scheme  # 'http' or 'https'
+    return f"{scheme}://{host}"
+
+
+async def _all_config() -> dict:
+    """Return all config rows as a plain dict."""
+    async with aiosqlite.connect(_DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        async with conn.execute("SELECT key, value FROM config") as cur:
+            rows = await cur.fetchall()
+            return {r["key"]: r["value"] for r in rows}
+
+
+# ---------------------------------------------------------------------------
+# Existing routes
+# ---------------------------------------------------------------------------
 
 async def _build_status() -> dict:
     """Assemble the status dict from the database."""
@@ -35,7 +76,6 @@ async def _build_status() -> dict:
     # Fetch recent replies for the current period (newest first, cap at 50)
     recent_replies: list[dict] = []
     if current_period_id:
-        import aiosqlite
         db_path = os.getenv("SQLITE_PATH", "/data/vacation.db")
         async with aiosqlite.connect(db_path) as conn:
             conn.row_factory = aiosqlite.Row
@@ -86,6 +126,162 @@ async def handle_health(request: web.Request) -> web.Response:
     return web.Response(text="ok")
 
 
+# ---------------------------------------------------------------------------
+# Setup wizard routes
+# ---------------------------------------------------------------------------
+
+@aiohttp_jinja2.template("setup.html")
+async def handle_setup_get(request: web.Request) -> dict:
+    """GET /setup — wizard entry point, step 1."""
+    config = await _all_config()
+    return {"step": 1, "config": config}
+
+
+async def handle_setup_step1_post(request: web.Request) -> web.Response:
+    """POST /setup/step1 — save Webex OAuth credentials."""
+    data = await request.post()
+    client_id = data.get("webex_client_id", "").strip()
+    client_secret = data.get("webex_client_secret", "").strip()
+
+    if client_id:
+        await db.set_config("webex_client_id", client_id)
+    if client_secret:
+        await db.set_config("webex_client_secret", client_secret)
+
+    raise web.HTTPFound("/setup/webex/auth")
+
+
+async def handle_setup_webex_auth(request: web.Request) -> web.Response:
+    """GET /setup/webex/auth — redirect browser to Webex OAuth consent page."""
+    client_id = await db.get_config("webex_client_id", "")
+    base_url = _get_base_url(request)
+    redirect_uri = f"{base_url}/setup/webex/callback"
+
+    scope = "spark:messages_write spark:rooms_read spark:memberships_read"
+    import urllib.parse
+    params = urllib.parse.urlencode({
+        "response_type": "code",
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "scope": scope,
+        "state": "setup",
+    })
+    webex_auth_url = f"https://webexapis.com/v1/authorize?{params}"
+
+    raise web.HTTPFound(webex_auth_url)
+
+
+async def handle_setup_webex_callback(request: web.Request) -> web.Response:
+    """GET /setup/webex/callback — exchange OAuth code for tokens."""
+    code = request.rel_url.query.get("code", "")
+    if not code:
+        raise web.HTTPBadRequest(reason="Missing OAuth code parameter")
+
+    client_id = await db.get_config("webex_client_id", "")
+    client_secret = await db.get_config("webex_client_secret", "")
+    base_url = _get_base_url(request)
+    redirect_uri = f"{base_url}/setup/webex/callback"
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://webexapis.com/v1/access_token",
+            data={
+                "grant_type": "authorization_code",
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "code": code,
+                "redirect_uri": redirect_uri,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            timeout=15,
+        )
+
+    if resp.status_code != 200:
+        logger.error("Token exchange failed: %s %s", resp.status_code, resp.text)
+        raise web.HTTPBadGateway(reason=f"Webex token exchange failed: {resp.status_code}")
+
+    token_data = resp.json()
+    expires_at = int(time.time()) + int(token_data.get("expires_in", 3600))
+
+    tokens = {
+        "access_token": token_data.get("access_token", ""),
+        "refresh_token": token_data.get("refresh_token", ""),
+        "expires_at": expires_at,
+    }
+
+    TOKENS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    TOKENS_PATH.write_text(json.dumps(tokens, indent=2))
+    logger.info("Webex tokens saved to %s", TOKENS_PATH)
+
+    raise web.HTTPFound("/setup/step2")
+
+
+@aiohttp_jinja2.template("setup.html")
+async def handle_setup_step2_get(request: web.Request) -> dict:
+    """GET /setup/step2 — vacation settings form."""
+    config = await _all_config()
+    return {"step": 2, "config": config}
+
+
+async def handle_setup_step2_post(request: web.Request) -> web.Response:
+    """POST /setup/step2 — save vacation settings."""
+    data = await request.post()
+
+    fields = {
+        "vacation_end": data.get("vacation_end", "").strip(),
+        "internal_domain": data.get("internal_domain", "cisco.com").strip() or "cisco.com",
+        "vacation_message_internal": data.get("vacation_message_internal", "").strip(),
+        "vacation_message_external": data.get("vacation_message_external", "").strip(),
+        "vacation_enabled": "true",
+    }
+
+    for key, value in fields.items():
+        await db.set_config(key, value)
+
+    raise web.HTTPFound("/setup/step3")
+
+
+@aiohttp_jinja2.template("setup.html")
+async def handle_setup_step3_get(request: web.Request) -> dict:
+    """GET /setup/step3 — optional settings form."""
+    config = await _all_config()
+    return {"step": 3, "config": config}
+
+
+async def handle_setup_step3_post(request: web.Request) -> web.Response:
+    """POST /setup/step3 — save optional settings."""
+    data = await request.post()
+
+    optional_fields = {
+        "poll_interval": data.get("poll_interval", "").strip(),
+        "mail_to": data.get("mail_to", "").strip(),
+        "smtp_host": data.get("smtp_host", "").strip(),
+        "smtp_port": data.get("smtp_port", "").strip(),
+        "smtp_user": data.get("smtp_user", "").strip(),
+        "smtp_password": data.get("smtp_password", "").strip(),
+        "gemini_api_key": data.get("gemini_api_key", "").strip(),
+        "openai_api_key": data.get("openai_api_key", "").strip(),
+    }
+
+    for key, value in optional_fields.items():
+        if value:  # only persist non-empty values
+            await db.set_config(key, value)
+
+    raise web.HTTPFound("/setup/summary")
+
+
+@aiohttp_jinja2.template("setup.html")
+async def handle_setup_summary(request: web.Request) -> dict:
+    """GET /setup/summary — review all config + auth status."""
+    config = await _all_config()
+    webex_auth_done = TOKENS_PATH.exists()
+    return {"step": "summary", "config": config, "webex_auth_done": webex_auth_done}
+
+
+# ---------------------------------------------------------------------------
+# App factory
+# ---------------------------------------------------------------------------
+
 def create_app() -> web.Application:
     app = web.Application()
 
@@ -94,9 +290,21 @@ def create_app() -> web.Application:
         loader=jinja2.FileSystemLoader(str(TEMPLATES_DIR)),
     )
 
+    # Existing routes
     app.router.add_get("/", handle_index)
     app.router.add_get("/api/status", handle_api_status)
     app.router.add_get("/health", handle_health)
+
+    # Setup wizard routes
+    app.router.add_get("/setup", handle_setup_get)
+    app.router.add_post("/setup/step1", handle_setup_step1_post)
+    app.router.add_get("/setup/webex/auth", handle_setup_webex_auth)
+    app.router.add_get("/setup/webex/callback", handle_setup_webex_callback)
+    app.router.add_get("/setup/step2", handle_setup_step2_get)
+    app.router.add_post("/setup/step2", handle_setup_step2_post)
+    app.router.add_get("/setup/step3", handle_setup_step3_get)
+    app.router.add_post("/setup/step3", handle_setup_step3_post)
+    app.router.add_get("/setup/summary", handle_setup_summary)
 
     return app
 

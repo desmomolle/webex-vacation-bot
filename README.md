@@ -55,51 +55,43 @@ cd webex-vacation-bot
 cp .env.example .env
 ```
 
-Öffne `.env` in einem Texteditor und fülle mindestens diese Felder aus:
+Öffne `.env` und trage mindestens ein:
 
 ```env
 MY_WEBEX_EMAIL=dein.name@cisco.com
-VACATION_END_DATE=2026-06-15
 WEBEX_CLIENT_ID=abc123...          # aus Schritt 1
 WEBEX_CLIENT_SECRET=xyz789...      # aus Schritt 1
 ```
 
----
-
-## Schritt 3 — Webex Token holen (einmalig)
-
-Installiere die Abhängigkeiten für das Setup-Script:
-
-```bash
-pip install httpx python-dotenv
-```
-
-Starte das Setup-Script:
-
-```bash
-python get_webex_token.py
-```
-
-Es öffnet sich automatisch dein Browser. Logge dich bei Webex ein und bestätige die Berechtigungen. Das Browser-Fenster zeigt dann **"✅ Fertig!"** — der Token wurde gespeichert.
-
-> **Hinweis:** Dieser Schritt muss nur einmal durchgeführt werden. Der Bot erneuert den Token danach selbstständig.
+Alle weiteren Einstellungen (Urlaubsdaten, Templates, Domain) kannst du im Browser-Wizard konfigurieren.
 
 ---
 
-## Schritt 4 — Bot starten
+## Schritt 3 — Bot starten
 
 ```bash
 docker compose up -d
 ```
 
-Das war's. Der Bot läuft jetzt im Hintergrund.
+---
 
-**Logs prüfen:**
-```bash
-docker logs webex-vacation-bot -f
-```
+## Schritt 4 — Setup-Wizard öffnen
 
-**Status im Browser:** [http://localhost:8080](http://localhost:8080)
+Öffne im Browser: **[http://localhost:8080/setup](http://localhost:8080/setup)**
+
+> Auf Synology/QNAP: `http://nas-ip:8080/setup`
+
+Der Wizard führt dich durch:
+1. **Webex autorisieren** — Browser-Login, Token wird automatisch gespeichert
+2. **Urlaubskonfiguration** — Rückkehrdatum, interne Domain, Nachrichten-Templates
+3. **Optionales** — E-Mail-Report, KI-Summary, Poll-Intervall
+4. **Zusammenfassung** — Überblick aller Einstellungen, Bot-Status
+
+Kein Terminal oder Python nötig für den Setup-Prozess.
+
+---
+
+## Schritt 5 — Status prüfen
 
 ---
 
@@ -208,18 +200,17 @@ docker compose up -d
 6. Klicke auf **"Weiter"** → Umgebungsvariablen über die Oberfläche eingeben oder `.env` hochladen
 7. **Port 8080** ist bereits konfiguriert — Status-Seite ist im lokalen Netz unter `http://nas-ip:8080` erreichbar
 
-**Token-Setup auf Synology:**
-Da Python nicht nativ auf Synology läuft, führe `python get_webex_token.py` einmalig auf deinem PC/Mac aus und kopiere die erstellte `data/tokens.json` in den Synology-Volume-Ordner.
+**Setup auf Synology:** Kein Python nötig. Nach `docker compose up` einfach `http://nas-ip:8080/setup` im Browser öffnen — der Wizard übernimmt alles inkl. Webex-Autorisierung direkt im Browser.
 
 ### QNAP NAS
 
 1. Öffne die **Container Station**
 2. Klicke auf **"Anwendungen"** → **"Erstellen"**
 3. Wähle **"docker-compose.yml hochladen"**
-4. Umgebungsvariablen direkt in der QNAP-Oberfläche setzen (unter "Umgebung")
-5. Alternativ: SSH → `docker compose up -d`
+4. Umgebungsvariablen direkt in der QNAP-Oberfläche setzen (mind. `MY_WEBEX_EMAIL`, `WEBEX_CLIENT_ID`, `WEBEX_CLIENT_SECRET`)
+5. Container starten → Browser: `http://nas-ip:8080/setup`
 
-Status-Seite: `http://nas-ip:8080`
+Kein Terminal nötig — Setup vollständig im Browser.
 
 **Hinweis für NAS-Deployment:** Der Bot läuft 24/7 ohne dass dein PC eingeschaltet sein muss. Die SQLite-Datei liegt im NAS-Volume und wird automatisch mit deinem NAS-Backup gesichert.
 

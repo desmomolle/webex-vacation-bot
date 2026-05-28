@@ -280,8 +280,10 @@ async def check_vacation_replies() -> dict:
             message_preview = "\n".join(message_log) or "(no text messages)"
             log.info(f"{sender_name}: {len(sender_msgs)} message(s) since phase start")
 
-            # Cisco internal vs external reply
-            reply_text = msg_internal if email_lower.endswith("@cisco.com") else msg_external
+            # Internal vs external reply (domain configurable)
+            internal_domain = os.getenv("INTERNAL_DOMAIN") or await db.get_config("internal_domain", "cisco.com")
+            internal_domain = str(internal_domain).strip().strip('"').lower().lstrip("@")
+            reply_text = msg_internal if email_lower.endswith(f"@{internal_domain}") else msg_external
 
             try:
                 reply_r = await client.post(
