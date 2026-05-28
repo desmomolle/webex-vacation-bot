@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webex Vacation Bot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: {
+              50:  '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-accent-600 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <h1 class="text-xl font-semibold text-gray-900 tracking-tight">Webex Vacation Bot</h1>
+      </div>
+
+      <!-- Status Badge -->
+      {% if status.enabled %}
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Aktiv
+      </span>
+      {% else %}
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-50 text-red-600 border border-red-200">
+        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+        Inaktiv
+      </span>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 max-w-4xl mx-auto w-full px-6 py-8 space-y-6">
+
+    <!-- Status Card -->
+    <section class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Status</h2>
+      </div>
+      <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+        <div>
+          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Urlaubsende</p>
+          <p class="text-base font-semibold text-gray-800">
+            {{ status.end_date if status.end_date else '—' }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Letzter Poll</p>
+          <p class="text-base font-semibold text-gray-800">
+            {{ status.last_check if status.last_check else '—' }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Replies gesamt</p>
+          <p class="text-base font-semibold text-gray-800">
+            {{ status.recent_replies | length }}
+          </p>
+        </div>
+
+      </div>
+      {% if status.current_period_id %}
+      <div class="px-6 pb-4">
+        <p class="text-xs text-gray-400">
+          Urlaubs-Periode ID: <span class="font-mono text-gray-600">#{{ status.current_period_id }}</span>
+        </p>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Return Summary (only if vacation ended and summary exists) -->
+    {% if status.summary %}
+    <section class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Zusammenfassung</h2>
+      </div>
+      <div class="px-6 py-5 space-y-5">
+
+        {% if status.summary.text %}
+        <p class="text-sm text-gray-700 leading-relaxed">{{ status.summary.text }}</p>
+        {% endif %}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+          {% if status.summary.urgent %}
+          <div>
+            <h3 class="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Dringend</h3>
+            <ul class="space-y-1">
+              {% for item in status.summary.urgent %}
+              <li class="flex items-start gap-2 text-sm text-gray-700">
+                <span class="mt-0.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0"></span>
+                {{ item }}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if status.summary.can_wait %}
+          <div>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Kann warten</h3>
+            <ul class="space-y-1">
+              {% for item in status.summary.can_wait %}
+              <li class="flex items-start gap-2 text-sm text-gray-700">
+                <span class="mt-0.5 w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0"></span>
+                {{ item }}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- Protocol Table -->
+    <section class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Protokoll</h2>
+        {% if status.recent_replies %}
+        <span class="text-xs text-gray-400">{{ status.recent_replies | length }} Einträge</span>
+        {% endif %}
+      </div>
+
+      {% if status.recent_replies %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-xs text-gray-400 uppercase tracking-wide border-b border-gray-100">
+              <th class="px-6 py-3 font-medium">Person</th>
+              <th class="px-6 py-3 font-medium">E-Mail</th>
+              <th class="px-6 py-3 font-medium">Nachrichtenvorschau</th>
+              <th class="px-6 py-3 font-medium whitespace-nowrap">Zeitpunkt</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            {% for reply in status.recent_replies %}
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-3.5 font-medium text-gray-800 whitespace-nowrap">
+                {{ reply.person_name }}
+              </td>
+              <td class="px-6 py-3.5 text-gray-500 whitespace-nowrap">
+                {{ reply.person_email }}
+              </td>
+              <td class="px-6 py-3.5 text-gray-600 max-w-xs">
+                <span class="line-clamp-1 block" title="{{ reply.message_preview }}">
+                  {{ reply.message_preview if reply.message_preview else '—' }}
+                </span>
+              </td>
+              <td class="px-6 py-3.5 text-gray-400 whitespace-nowrap font-mono text-xs">
+                {{ reply.replied_at }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="px-6 py-10 text-center">
+        <svg class="w-8 h-8 text-gray-200 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p class="text-sm text-gray-400">Noch keine Einträge in diesem Zeitraum.</p>
+      </div>
+      {% endif %}
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-200 bg-white mt-auto">
+    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+      <p class="text-xs text-gray-400">Powered by Webex Vacation Bot</p>
+      <p class="text-xs text-gray-300 font-mono">{{ status.last_check or '' }}</p>
+    </div>
+  </footer>
+
+</body>
+</html>
