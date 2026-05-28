@@ -5,20 +5,19 @@ Ein schlanker, selbst gehosteter Bot der automatisch auf eingehende Webex-Direkt
 **Was er tut:**
 - Pollt deine Webex-DMs alle 15 Minuten
 - Antwortet jeder Person genau einmal pro Urlaubsphase
-- Unterscheidet automatisch zwischen internen Cisco-Kollegen und externen Kontakten (unterschiedliche Templates)
+- Unterscheidet automatisch zwischen internen und externen Kontakten (konfigurierbare Domain, unterschiedliche Templates)
 - Führt ein vollständiges Protokoll: wer wann geschrieben hat
 - Deaktiviert sich automatisch wenn das Rückkehrdatum erreicht ist
-- Status-Seite im Browser: `http://localhost:8080`
+- Status-Seite + Steuerung im Browser: `http://localhost:8080`
+- Bot per Klick aktivieren/deaktivieren — kein Terminal nötig
 
 **Was er NICHT tut:**
-- Nachrichten als gelesen markieren (bleiben unberührt)
 - Gruppenräume oder Spaces beantworten (nur 1:1 DMs)
 - Nachrichten weiterleiten oder speichern
 
 **Voraussetzungen:**
 - Docker Desktop (Windows/Mac) oder Docker auf Linux/NAS
 - Webex-Account + einmalige App-Registrierung (~5 Minuten)
-- Python 3.11+ (nur für das einmalige Token-Setup)
 - Keine Programmierkenntnisse nötig
 
 ---
@@ -139,15 +138,16 @@ Container auswählen → "Protokoll" → live oder als Datei exportieren.
 
 ---
 
-## Bot stoppen / Urlaub beenden
+## Bot steuern / Urlaub beenden
 
+**Per Browser (empfohlen):**
+Öffne `http://localhost:8080` → Button **"Deaktivieren"** oder **"Aktivieren"** — fertig. Kein Terminal nötig.
+
+Der Bot deaktiviert sich außerdem automatisch am konfigurierten Rückkehrdatum.
+
+**Container stoppen** (nur wenn du den Bot komplett ausschalten willst):
 ```bash
-# Bot stoppen
 docker compose down
-
-# Oder: Urlaub vorzeitig beenden (Bot deaktiviert sich automatisch am VACATION_END_DATE)
-# Dafür VACATION_ENABLED=false in .env setzen, dann:
-docker compose restart
 ```
 
 ---

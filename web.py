@@ -127,7 +127,7 @@ async def _all_config() -> dict:
 
 async def _build_status() -> dict:
     """Assemble the status dict from the database."""
-    enabled_val = await db.get_config("enabled", "false")
+    enabled_val = await db.get_config("vacation_enabled", "false")
     enabled = enabled_val.lower() in ("1", "true", "yes")
 
     end_date      = await db.get_config("end_date")
@@ -186,6 +186,14 @@ async def handle_api_status(request: web.Request) -> web.Response:
 
 async def handle_health(request: web.Request) -> web.Response:
     return web.Response(text="ok")
+
+
+async def handle_api_toggle(request: web.Request) -> web.Response:
+    """POST /api/toggle — flip vacation_enabled on/off."""
+    current = await db.get_config("vacation_enabled", "false")
+    new_enabled = current.lower() not in ("1", "true", "yes")
+    await db.set_config("vacation_enabled", "true" if new_enabled else "false")
+    return web.json_response({"enabled": new_enabled})
 
 
 # ---------------------------------------------------------------------------
@@ -419,6 +427,7 @@ def create_app() -> web.Application:
     app.router.add_get("/", handle_index)
     app.router.add_get("/api/status", handle_api_status)
     app.router.add_get("/health", handle_health)
+    app.router.add_post("/api/toggle", handle_api_toggle)
 
     # Setup wizard routes
     app.router.add_get("/setup", handle_setup_get)

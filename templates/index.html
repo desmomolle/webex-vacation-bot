@@ -42,20 +42,46 @@
         <h1 class="text-xl font-semibold text-gray-900 tracking-tight">Webex Vacation Bot</h1>
       </div>
 
-      <!-- Status Badge -->
-      {% if status.enabled %}
-      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Aktiv
-      </span>
-      {% else %}
-      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-50 text-red-600 border border-red-200">
-        <span class="w-2 h-2 rounded-full bg-red-500"></span>
-        Inaktiv
-      </span>
-      {% endif %}
+      <!-- Status Badge + Toggle -->
+      <div class="flex items-center gap-3">
+        {% if status.enabled %}
+        <span id="status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Aktiv
+        </span>
+        <button onclick="toggleBot()" id="toggle-btn"
+          class="px-3 py-1.5 rounded-lg text-sm font-medium bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors">
+          Deaktivieren
+        </button>
+        {% else %}
+        <span id="status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-500 border border-gray-200">
+          <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+          Inaktiv
+        </span>
+        <button onclick="toggleBot()" id="toggle-btn"
+          class="px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors">
+          Aktivieren
+        </button>
+        {% endif %}
+      </div>
     </div>
   </header>
+
+  <script>
+    async function toggleBot() {
+      const btn = document.getElementById('toggle-btn');
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        const r = await fetch('/api/toggle', { method: 'POST' });
+        const data = await r.json();
+        location.reload();
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = 'Fehler – nochmal';
+      }
+    }
+  </script>
 
   <!-- Main -->
   <main class="flex-1 max-w-4xl mx-auto w-full px-6 py-8 space-y-6">
