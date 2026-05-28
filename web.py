@@ -16,8 +16,11 @@ Routes:
   POST /setup/step3            → save optional settings
   GET  /setup/summary          → review all config
 """
+import base64
+import hmac
 import os
 import json
+import secrets
 import time
 import logging
 from pathlib import Path
@@ -48,6 +51,65 @@ def _get_base_url(request: web.Request) -> str:
     host = request.headers.get("Host", "localhost:8080")
     scheme = request.url.scheme  # 'http' or 'https'
     return f"{scheme}://{host}"
+
+
+# ---------------------------------------------------------------------------
+# Security helpers
+# ---------------------------------------------------------------------------
+
+def _check_setup_auth(request: web.Request) -> bool:
+    """Check HTTP Basic Auth for setup routes. Only the password is verified."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Basic "):
+        return False
+    try:
+        decoded = base64.b64decode(auth_header[6:]).decode("utf-8", errors="replace")
+        _username, _, password = decoded.partition(":")
+        expected = os.getenv("SETUP_PASSWORD", "")
+        if not expected:
+            # No password configured → deny access
+            return False
+        return hmac.compare_digest(password, expected)
+    except Exception:
+        return False
+
+
+def _setup_auth_required(request: web.Request):
+    """Return a 401 response if auth fails, else None."""
+    if _check_setup_auth(request):
+        return None
+    return web.Response(
+        status=401,
+        headers={"WWW-Authenticate": 'Basic realm="Webex Vacation Bot Setup"'},
+        text="Unauthorized",
+    )
+
+
+def _generate_csrf_token() -> str:
+    return secrets.token_hex(32)
+
+
+def _get_csrf_token(request: web.Request) -> str:
+    """Return the existing CSRF cookie token or generate a fresh one."""
+    return request.cookies.get("csrf_token") or _generate_csrf_token()
+
+
+def _validate_csrf(request: web.Request, form_data: dict) -> bool:
+    """Constant-time comparison of the submitted token against the cookie."""
+    submitted = form_data.get("csrf_token", "")
+    cookie_val = request.cookies.get("csrf_token", "")
+    if not submitted or not cookie_val:
+        return False
+    return hmac.compare_digest(submitted, cookie_val)
+
+
+def _mask(val) -> str:
+    """Mask a secret value, keeping only the first 4 chars."""
+    if not val:
+        return ""
+    if len(val) <= 4:
+        return "****"
+    return val[:4] + "****"
 
 
 async def _all_config() -> dict:
@@ -130,16 +192,29 @@ async def handle_health(request: web.Request) -> web.Response:
 # Setup wizard routes
 # ---------------------------------------------------------------------------
 
-@aiohttp_jinja2.template("setup.html")
-async def handle_setup_get(request: web.Request) -> dict:
+async def handle_setup_get(request: web.Request) -> web.Response:
     """GET /setup — wizard entry point, step 1."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     config = await _all_config()
-    return {"step": 1, "config": config}
+    csrf_token = _get_csrf_token(request)
+    response = aiohttp_jinja2.render_template(
+        "setup.html", request, {"step": 1, "config": config, "csrf_token": csrf_token}
+    )
+    response.set_cookie("csrf_token", csrf_token, httponly=True, samesite="Strict")
+    return response
 
 
 async def handle_setup_step1_post(request: web.Request) -> web.Response:
     """POST /setup/step1 — save Webex OAuth credentials."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     data = await request.post()
+    if not _validate_csrf(request, data):
+        return web.Response(status=403, text="CSRF validation failed")
+
     client_id = data.get("webex_client_id", "").strip()
     client_secret = data.get("webex_client_secret", "").strip()
 
@@ -153,6 +228,9 @@ async def handle_setup_step1_post(request: web.Request) -> web.Response:
 
 async def handle_setup_webex_auth(request: web.Request) -> web.Response:
     """GET /setup/webex/auth — redirect browser to Webex OAuth consent page."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     client_id = await db.get_config("webex_client_id", "")
     base_url = _get_base_url(request)
     redirect_uri = f"{base_url}/setup/webex/callback"
@@ -173,6 +251,9 @@ async def handle_setup_webex_auth(request: web.Request) -> web.Response:
 
 async def handle_setup_webex_callback(request: web.Request) -> web.Response:
     """GET /setup/webex/callback — exchange OAuth code for tokens."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     code = request.rel_url.query.get("code", "")
     if not code:
         raise web.HTTPBadRequest(reason="Missing OAuth code parameter")
@@ -216,16 +297,28 @@ async def handle_setup_webex_callback(request: web.Request) -> web.Response:
     raise web.HTTPFound("/setup/step2")
 
 
-@aiohttp_jinja2.template("setup.html")
-async def handle_setup_step2_get(request: web.Request) -> dict:
+async def handle_setup_step2_get(request: web.Request) -> web.Response:
     """GET /setup/step2 — vacation settings form."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     config = await _all_config()
-    return {"step": 2, "config": config}
+    csrf_token = _get_csrf_token(request)
+    response = aiohttp_jinja2.render_template(
+        "setup.html", request, {"step": 2, "config": config, "csrf_token": csrf_token}
+    )
+    response.set_cookie("csrf_token", csrf_token, httponly=True, samesite="Strict")
+    return response
 
 
 async def handle_setup_step2_post(request: web.Request) -> web.Response:
     """POST /setup/step2 — save vacation settings."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     data = await request.post()
+    if not _validate_csrf(request, data):
+        return web.Response(status=403, text="CSRF validation failed")
 
     fields = {
         "vacation_end": data.get("vacation_end", "").strip(),
@@ -241,16 +334,28 @@ async def handle_setup_step2_post(request: web.Request) -> web.Response:
     raise web.HTTPFound("/setup/step3")
 
 
-@aiohttp_jinja2.template("setup.html")
-async def handle_setup_step3_get(request: web.Request) -> dict:
+async def handle_setup_step3_get(request: web.Request) -> web.Response:
     """GET /setup/step3 — optional settings form."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     config = await _all_config()
-    return {"step": 3, "config": config}
+    csrf_token = _get_csrf_token(request)
+    response = aiohttp_jinja2.render_template(
+        "setup.html", request, {"step": 3, "config": config, "csrf_token": csrf_token}
+    )
+    response.set_cookie("csrf_token", csrf_token, httponly=True, samesite="Strict")
+    return response
 
 
 async def handle_setup_step3_post(request: web.Request) -> web.Response:
     """POST /setup/step3 — save optional settings."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     data = await request.post()
+    if not _validate_csrf(request, data):
+        return web.Response(status=403, text="CSRF validation failed")
 
     optional_fields = {
         "poll_interval": data.get("poll_interval", "").strip(),
@@ -270,12 +375,32 @@ async def handle_setup_step3_post(request: web.Request) -> web.Response:
     raise web.HTTPFound("/setup/summary")
 
 
-@aiohttp_jinja2.template("setup.html")
-async def handle_setup_summary(request: web.Request) -> dict:
+async def handle_setup_summary(request: web.Request) -> web.Response:
     """GET /setup/summary — review all config + auth status."""
+    auth = _setup_auth_required(request)
+    if auth:
+        return auth
     config = await _all_config()
     webex_auth_done = TOKENS_PATH.exists()
-    return {"step": "summary", "config": config, "webex_auth_done": webex_auth_done}
+
+    # Mask secrets before passing to template
+    for key in ("webex_client_secret", "smtp_password", "gemini_api_key", "openai_api_key"):
+        if key in config:
+            config[key] = _mask(config[key])
+
+    csrf_token = _get_csrf_token(request)
+    response = aiohttp_jinja2.render_template(
+        "setup.html",
+        request,
+        {
+            "step": "summary",
+            "config": config,
+            "webex_auth_done": webex_auth_done,
+            "csrf_token": csrf_token,
+        },
+    )
+    response.set_cookie("csrf_token", csrf_token, httponly=True, samesite="Strict")
+    return response
 
 
 # ---------------------------------------------------------------------------

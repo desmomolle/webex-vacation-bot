@@ -68,6 +68,23 @@ async def _run_web() -> None:
 
 async def main() -> None:
     log.info("Webex Vacation Bot starting")
+
+    import crypto
+    crypto.load_or_create_key()  # ensure key exists, logs if newly created
+
+    setup_pw = os.getenv("SETUP_PASSWORD", "")
+    if not setup_pw:
+        import secrets as _secrets
+        import string as _string
+        alphabet = _string.ascii_letters + _string.digits
+        setup_pw = "".join(_secrets.choice(alphabet) for _ in range(10))
+        os.environ["SETUP_PASSWORD"] = setup_pw
+        log.warning("=" * 60)
+        log.warning("SETUP WIZARD PASSWORD (auto-generated): %s", setup_pw)
+        log.warning("Set SETUP_PASSWORD=... in .env to use a fixed password")
+        log.warning("Access wizard: http://localhost:8080/setup")
+        log.warning("=" * 60)
+
     await db.init_db()
 
     loop = asyncio.get_running_loop()

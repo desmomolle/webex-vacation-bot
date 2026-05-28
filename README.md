@@ -242,6 +242,28 @@ docker exec -it webex-vacation-bot sqlite3 /data/vacation.db "SELECT * FROM vaca
 
 ---
 
+## Sicherheit
+
+Der Bot speichert sensible Daten (Webex-Token, API-Keys) sicher:
+
+**Webex-Tokens sind verschlüsselt** — die Datei `data/tokens.json` wird mit Fernet-Verschlüsselung gespeichert. Der Key liegt in `data/.key` und wird beim ersten Start automatisch erzeugt.
+
+**Den `data/`-Ordner regelmäßig sichern** — er enthält Key + Datenbank. Ohne den Key können gespeicherte Tokens nicht entschlüsselt werden.
+
+**Setup-Wizard ist passwortgeschützt** — beim ersten Start wird ein zufälliges Passwort erzeugt:
+```bash
+docker logs webex-vacation-bot | grep "SETUP WIZARD PASSWORD"
+```
+Für ein festes Passwort: `SETUP_PASSWORD=deinpasswort` in `.env` eintragen.
+
+**Secrets werden maskiert** — Client Secret, API-Keys und SMTP-Passwort werden in der Summary-Seite nur als `abcd****` angezeigt.
+
+**CSRF-Schutz** — alle Wizard-Formulare sind gegen Cross-Site-Request-Forgery abgesichert.
+
+> Hinweis: Der Bot ist für den Betrieb im lokalen Heimnetz / Firmen-VPN ausgelegt. Port 8080 sollte **nicht** direkt aus dem Internet erreichbar sein — nutze einen VPN oder Cloudflare Tunnel mit Access-Policy wenn externer Zugriff nötig ist.
+
+---
+
 ## Häufige Fragen
 
 **Der Bot startet nicht / "no Webex credentials found"**

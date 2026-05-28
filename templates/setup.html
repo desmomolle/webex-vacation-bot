@@ -215,6 +215,7 @@
 
         <!-- Form -->
         <form method="POST" action="/setup/step1" class="space-y-4">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
           <div>
             <label for="webex_client_id" class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
@@ -270,6 +271,7 @@
 
       <div class="px-6 py-5">
         <form method="POST" action="/setup/step2" class="space-y-5">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
           <!-- Vacation End Date -->
           <div>
@@ -353,6 +355,7 @@
 
       <div class="px-6 py-5">
         <form method="POST" action="/setup/step3" class="space-y-8">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
           <!-- ── E-Mail-Report ── -->
           <section class="space-y-4">
@@ -664,6 +667,10 @@
       </a>
     </div>
 
+    {% if step == "summary" %}
+    <p class="text-xs text-gray-400 text-center mt-4">
+      Setup-Zugang ist durch ein Passwort geschützt. Token werden verschlüsselt gespeichert.
+    </p>
     {% endif %}
 
   </main>

@@ -13,6 +13,9 @@ from pathlib import Path
 
 import httpx
 
+import crypto
+from crypto import InvalidToken
+
 log = logging.getLogger("vacation-bot.auth")
 
 TOKENS_FILE = Path(os.getenv("SQLITE_PATH", "/data/vacation.db")).parent / "tokens.json"
@@ -22,7 +25,13 @@ WEBEX_TOKEN_URL = "https://webexapis.com/v1/access_token"
 def _load_tokens() -> dict:
     if TOKENS_FILE.exists():
         try:
-            return json.loads(TOKENS_FILE.read_text())
+            raw = TOKENS_FILE.read_text()
+            try:
+                raw = crypto.decrypt_str(raw)
+            except InvalidToken:
+                # File is plain JSON from before encryption was added — migrate on next save
+                log.info("tokens.json is unencrypted (pre-migration) — will encrypt on next write")
+            return json.loads(raw)
         except (json.JSONDecodeError, OSError):
             log.warning("Could not read tokens.json — starting fresh")
     return {}
@@ -30,7 +39,7 @@ def _load_tokens() -> dict:
 
 def _save_tokens(tokens: dict) -> None:
     TOKENS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    TOKENS_FILE.write_text(json.dumps(tokens, indent=2))
+    TOKENS_FILE.write_text(crypto.encrypt_str(json.dumps(tokens, indent=2)))
 
 
 def _is_expired(tokens: dict, margin_seconds: int = 600) -> bool:
