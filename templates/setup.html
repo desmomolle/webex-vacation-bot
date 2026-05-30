@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webex Vacation Bot – Einrichtung</title>
+  <title>Webex Vacation Bot – Setup</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -31,7 +31,7 @@
 
   {% if demo %}
   <div class="bg-amber-400 text-amber-950 text-center text-xs font-semibold py-1.5 tracking-wide">
-    DEMO-MODUS — „Bei Webex autorisieren" wird simuliert, es werden keine echten Tokens geholt
+    DEMO MODE — "Authorize Webex" is simulated, no real tokens are fetched
   </div>
   {% endif %}
 
@@ -46,7 +46,7 @@
       </div>
       <div>
         <h1 class="text-xl font-semibold text-gray-900 tracking-tight leading-tight">Webex Vacation Bot</h1>
-        <p class="text-xs text-gray-400 leading-tight">Einrichtungsassistent</p>
+        <p class="text-xs text-gray-400 leading-tight">Setup assistant</p>
       </div>
     </div>
   </header>
@@ -55,7 +55,7 @@
   <main class="flex-1 max-w-2xl mx-auto w-full px-6 py-8 space-y-6">
 
     <!-- ── Step Indicator ── -->
-    <nav aria-label="Einrichtungsschritte">
+    <nav aria-label="Setup steps">
       <ol class="flex items-center w-full">
 
         {# Helper macro: step state = "done" | "active" | "future" #}
@@ -105,7 +105,7 @@
               <span class="text-gray-400 text-xs font-bold">2</span>
             </span>
             {% endif %}
-            <span class="text-xs {% if s2 == 'active' %}text-accent-600 font-semibold{% elif s2 == 'done' %}text-emerald-600 font-medium{% else %}text-gray-400{% endif %} whitespace-nowrap hidden sm:block">Urlaub</span>
+            <span class="text-xs {% if s2 == 'active' %}text-accent-600 font-semibold{% elif s2 == 'done' %}text-emerald-600 font-medium{% else %}text-gray-400{% endif %} whitespace-nowrap hidden sm:block">Vacation</span>
           </div>
           <div class="flex-1 h-0.5 mx-2 {% if s2 == 'done' %}bg-emerald-400{% else %}bg-gray-200{% endif %}"></div>
         </li>
@@ -128,7 +128,7 @@
               <span class="text-gray-400 text-xs font-bold">3</span>
             </span>
             {% endif %}
-            <span class="text-xs {% if s3 == 'active' %}text-accent-600 font-semibold{% elif s3 == 'done' %}text-emerald-600 font-medium{% else %}text-gray-400{% endif %} whitespace-nowrap hidden sm:block">Optionen</span>
+            <span class="text-xs {% if s3 == 'active' %}text-accent-600 font-semibold{% elif s3 == 'done' %}text-emerald-600 font-medium{% else %}text-gray-400{% endif %} whitespace-nowrap hidden sm:block">Options</span>
           </div>
           <div class="flex-1 h-0.5 mx-2 {% if s3 == 'done' %}bg-emerald-400{% else %}bg-gray-200{% endif %}"></div>
         </li>
@@ -148,7 +148,7 @@
             </svg>
           </span>
           {% endif %}
-          <span class="text-xs {% if s4 == 'active' %}text-accent-600 font-semibold{% else %}text-gray-400{% endif %} whitespace-nowrap hidden sm:block">Zusammenfassung</span>
+          <span class="text-xs {% if s4 == 'active' %}text-accent-600 font-semibold{% else %}text-gray-400{% endif %} whitespace-nowrap hidden sm:block">Summary</span>
         </li>
 
       </ol>
@@ -172,8 +172,8 @@
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 class="text-base font-semibold text-gray-800">Schritt 1 — Webex App einrichten</h2>
-        <p class="text-sm text-gray-500 mt-0.5">Registriere eine Integration auf der Webex Developer-Plattform.</p>
+        <h2 class="text-base font-semibold text-gray-800">Step 1 — Set up Webex App</h2>
+        <p class="text-sm text-gray-500 mt-0.5">Register an integration on the Webex Developer platform.</p>
       </div>
 
       <div class="px-6 py-5 space-y-5">
@@ -193,21 +193,21 @@
         <div>
           <p class="text-sm font-medium text-gray-700 mb-2">
             Redirect URI
-            <span class="ml-1 text-xs font-normal text-gray-400">(beim Anlegen der Integration eintragen)</span>
+            <span class="ml-1 text-xs font-normal text-gray-400">(enter this when creating the integration)</span>
           </p>
           <div class="flex items-stretch rounded-lg border border-accent-200 bg-accent-50 overflow-hidden">
             <code class="flex-1 px-4 py-2.5 text-sm font-mono text-accent-700 break-all select-all">{{ redirect_uri }}</code>
             <button type="button"
-                    onclick="navigator.clipboard.writeText('{{ redirect_uri }}'); this.textContent='Kopiert!';"
+                    onclick="navigator.clipboard.writeText('{{ redirect_uri }}'); this.textContent='Copied!';"
                     class="px-3 text-xs font-medium text-accent-600 hover:bg-accent-100 border-l border-accent-200 transition-colors whitespace-nowrap">
-              Kopieren
+              Copy
             </button>
           </div>
         </div>
 
         <!-- Required Scopes -->
         <div>
-          <p class="text-sm font-medium text-gray-700 mb-2">Benötigte Scopes</p>
+          <p class="text-sm font-medium text-gray-700 mb-2">Required Scopes</p>
           <ul class="space-y-1.5">
             {% for scope in ["spark:messages_write", "spark:rooms_read", "spark:memberships_read"] %}
             <li class="inline-flex items-center gap-2 mr-2">
@@ -244,13 +244,13 @@
                    placeholder="••••••••••••••••"
                    required
                    class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition" />
-            <p class="mt-1 text-xs text-gray-400">Wird verschlüsselt gespeichert und nicht angezeigt.</p>
+            <p class="mt-1 text-xs text-gray-400">Stored encrypted and never displayed.</p>
           </div>
 
           <div class="pt-2">
             <button type="submit"
                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2">
-              Weiter → Webex autorisieren
+              Next → Authorize Webex
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -265,14 +265,14 @@
 
 
     {# ══════════════════════════════════════════ #}
-    {# STEP 2 — Urlaubskonfiguration             #}
+    {# STEP 2 — Vacation configuration            #}
     {# ══════════════════════════════════════════ #}
     {% if step == 2 %}
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 class="text-base font-semibold text-gray-800">Schritt 2 — Urlaubskonfiguration</h2>
-        <p class="text-sm text-gray-500 mt-0.5">Wann bist du weg und was sollen die Leute hören?</p>
+        <h2 class="text-base font-semibold text-gray-800">Step 2 — Vacation configuration</h2>
+        <p class="text-sm text-gray-500 mt-0.5">When are you away and what should people hear?</p>
       </div>
 
       <div class="px-6 py-5">
@@ -281,19 +281,19 @@
 
           <!-- Vacation End Date -->
           <div>
-            <label for="vacation_end" class="block text-sm font-medium text-gray-700 mb-1">Urlaubsende</label>
+            <label for="vacation_end" class="block text-sm font-medium text-gray-700 mb-1">Return date</label>
             <input type="date"
                    id="vacation_end"
                    name="vacation_end"
                    value="{{ config.get('vacation_end', '') }}"
                    required
                    class="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition" />
-            <p class="mt-1 text-xs text-gray-400">Ab diesem Datum antwortet der Bot nicht mehr.</p>
+            <p class="mt-1 text-xs text-gray-400">After this date the bot will stop replying.</p>
           </div>
 
           <!-- Internal Domain -->
           <div>
-            <label for="internal_domain" class="block text-sm font-medium text-gray-700 mb-1">Interne Domain</label>
+            <label for="internal_domain" class="block text-sm font-medium text-gray-700 mb-1">Internal domain</label>
             <div class="flex items-center rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-accent-500 focus-within:border-transparent transition">
               <span class="px-3 py-2 bg-gray-50 border-r border-gray-300 text-gray-400 text-sm">@</span>
               <input type="text"
@@ -303,26 +303,26 @@
                      placeholder="cisco.com"
                      class="flex-1 px-3 py-2 text-sm text-gray-800 placeholder-gray-400 bg-white focus:outline-none" />
             </div>
-            <p class="mt-1 text-xs text-gray-400">Nachrichten von @dieser Domain gelten als interne Kollegen.</p>
+            <p class="mt-1 text-xs text-gray-400">Messages from @this domain are treated as internal colleagues.</p>
           </div>
 
           <!-- Internal Message -->
           <div>
             <label for="vacation_message_internal" class="block text-sm font-medium text-gray-700 mb-1">
-              Nachricht für interne Kollegen
+              Message for internal colleagues
             </label>
             <textarea id="vacation_message_internal"
                       name="vacation_message_internal"
                       rows="3"
-                      placeholder="Hi! Ich bin im Urlaub und zurück am {end_date}. In dringenden Fällen melde dich bei…"
+                      placeholder="Hi! I'm on vacation and back on {end_date}. For urgent matters please reach out to…"
                       class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition resize-y">{{ config.get('vacation_message_internal', '') }}</textarea>
-            <p class="mt-1 text-xs text-gray-400"><code class="bg-gray-100 px-1 rounded">{end_date}</code> wird automatisch durch das Urlaubsende ersetzt.</p>
+            <p class="mt-1 text-xs text-gray-400"><code class="bg-gray-100 px-1 rounded">{end_date}</code> is automatically replaced with the return date.</p>
           </div>
 
           <!-- External Message -->
           <div>
             <label for="vacation_message_external" class="block text-sm font-medium text-gray-700 mb-1">
-              Nachricht für externe Kontakte
+              Message for external contacts
             </label>
             <textarea id="vacation_message_external"
                       name="vacation_message_external"
@@ -334,7 +334,7 @@
           <div class="pt-2">
             <button type="submit"
                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2">
-              Weiter → Optionale Einstellungen
+              Next → Optional settings
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -349,21 +349,21 @@
 
 
     {# ══════════════════════════════════════════ #}
-    {# STEP 3 — Optionale Einstellungen          #}
+    {# STEP 3 — Optional settings                 #}
     {# ══════════════════════════════════════════ #}
     {% if step == 3 %}
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 class="text-base font-semibold text-gray-800">Schritt 3 — Optionale Einstellungen</h2>
-        <p class="text-sm text-gray-500 mt-0.5">Alles hier kann auch später jederzeit geändert werden.</p>
+        <h2 class="text-base font-semibold text-gray-800">Step 3 — Optional settings</h2>
+        <p class="text-sm text-gray-500 mt-0.5">Everything here can also be changed at any time later.</p>
       </div>
 
       <div class="px-6 py-5">
         <form method="POST" action="/setup/step3" class="space-y-8">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-          <!-- ── E-Mail-Report ── -->
+          <!-- ── Email report ── -->
           <section class="space-y-4">
             <div class="flex items-center gap-2">
               <h3 class="text-sm font-semibold text-gray-800">E-Mail-Report</h3>
@@ -371,7 +371,7 @@
             </div>
 
             <div>
-              <label for="mail_to" class="block text-sm font-medium text-gray-700 mb-1">Empfänger-Adresse</label>
+              <label for="mail_to" class="block text-sm font-medium text-gray-700 mb-1">Recipient address</label>
               <input type="email"
                      id="mail_to"
                      name="mail_to"
@@ -385,14 +385,14 @@
               <div class="px-4 py-3 border-b border-gray-200 bg-white flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-gray-700">Gmail OAuth</p>
-                  <p class="text-xs text-gray-400 mt-0.5">Empfohlen — kein App-Passwort nötig</p>
+                  <p class="text-xs text-gray-400 mt-0.5">Recommended — no app password required</p>
                 </div>
                 <a href="/setup/gmail/auth"
                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 hover:border-accent-400 hover:text-accent-700 text-gray-600 text-xs font-medium rounded-lg transition-colors">
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>
-                  Gmail autorisieren
+                  Authorize Gmail
                 </a>
               </div>
 
@@ -423,7 +423,7 @@
                 </div>
 
                 <div>
-                  <label for="smtp_user" class="block text-xs font-medium text-gray-600 mb-1">SMTP Benutzer</label>
+                  <label for="smtp_user" class="block text-xs font-medium text-gray-600 mb-1">SMTP User</label>
                   <input type="text"
                          id="smtp_user"
                          name="smtp_user"
@@ -433,7 +433,7 @@
                 </div>
 
                 <div>
-                  <label for="smtp_password" class="block text-xs font-medium text-gray-600 mb-1">SMTP Passwort</label>
+                  <label for="smtp_password" class="block text-xs font-medium text-gray-600 mb-1">SMTP Password</label>
                   <input type="password"
                          id="smtp_password"
                          name="smtp_password"
@@ -445,13 +445,13 @@
             </div>
           </section>
 
-          <!-- ── KI-Summary ── -->
+          <!-- ── AI summary ── -->
           <section class="space-y-4">
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-semibold text-gray-800">KI-Zusammenfassung bei Rückkehr</h3>
+              <h3 class="text-sm font-semibold text-gray-800">AI summary on return</h3>
               <span class="px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500 rounded">optional</span>
             </div>
-            <p class="text-xs text-gray-400 -mt-2">Einmalig bei Urlaubsende — kostet im Cent-Bereich.</p>
+            <p class="text-xs text-gray-400 -mt-2">Generated once at vacation end — costs a few cents.</p>
 
             <div>
               <label for="gemini_api_key" class="block text-sm font-medium text-gray-700 mb-1">Gemini API Key</label>
@@ -473,7 +473,7 @@
                      autocomplete="off"
                      placeholder="sk-…"
                      class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition font-mono" />
-              <p class="mt-1 text-xs text-gray-400">Wird Gemini verwendet, bleibt OpenAI ungenutzt — und umgekehrt.</p>
+              <p class="mt-1 text-xs text-gray-400">If Gemini is used, OpenAI stays unused — and vice versa.</p>
             </div>
           </section>
 
@@ -490,15 +490,15 @@
                      min="5"
                      max="60"
                      class="w-24 px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition" />
-              <label for="poll_interval" class="text-sm text-gray-600">Minuten</label>
+              <label for="poll_interval" class="text-sm text-gray-600">Minutes</label>
             </div>
-            <p class="text-xs text-gray-400">Wie oft der Bot neue Webex-Nachrichten prüft. Minimum: 5, Maximum: 60.</p>
+            <p class="text-xs text-gray-400">How often the bot checks for new Webex messages. Minimum: 5, Maximum: 60.</p>
           </section>
 
           <div class="pt-2 border-t border-gray-100">
             <button type="submit"
                     class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2">
-              Fertig → Zusammenfassung anzeigen
+              Done → Show summary
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
@@ -520,7 +520,7 @@
     <!-- Auth status -->
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Webex Autorisierung</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Webex authorization</h2>
       </div>
       <div class="px-6 py-4 flex items-center justify-between gap-4">
         {% if config.get("webex_authorized") %}
@@ -530,7 +530,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </span>
-          <span class="text-sm font-medium text-emerald-700">Autorisiert</span>
+          <span class="text-sm font-medium text-emerald-700">Authorized</span>
         </div>
         {% else %}
         <div class="flex items-center gap-2">
@@ -539,11 +539,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01" />
             </svg>
           </span>
-          <span class="text-sm font-medium text-amber-700">Nicht autorisiert</span>
+          <span class="text-sm font-medium text-amber-700">Not authorized</span>
         </div>
         <a href="/setup/webex/auth"
            class="text-sm text-accent-600 hover:text-accent-700 font-medium underline underline-offset-2">
-          Jetzt autorisieren →
+          Authorize now →
         </a>
         {% endif %}
       </div>
@@ -552,24 +552,24 @@
     <!-- Two-column summary grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-      <!-- Urlaubskonfiguration -->
+      <!-- Vacation configuration -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-100 bg-gray-50">
-          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Urlaubskonfiguration</h2>
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Vacation configuration</h2>
         </div>
         <div class="px-5 py-4 space-y-3">
           <div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Urlaubsende</p>
+            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Return date</p>
             <p class="text-sm font-medium text-gray-800">{{ config.get('vacation_end', '—') }}</p>
           </div>
           <div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Interne Domain</p>
+            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Internal domain</p>
             <p class="text-sm font-medium text-gray-800">
               {% if config.get('internal_domain') %}@{{ config.get('internal_domain') }}{% else %}—{% endif %}
             </p>
           </div>
           <div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Nachricht intern</p>
+            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Internal message</p>
             <p class="text-sm text-gray-600 leading-snug">
               {% if config.get('vacation_message_internal') %}
                 {{ config.get('vacation_message_internal')[:80] }}{% if config.get('vacation_message_internal')|length > 80 %}…{% endif %}
@@ -577,7 +577,7 @@
             </p>
           </div>
           <div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Nachricht extern</p>
+            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">External message</p>
             <p class="text-sm text-gray-600 leading-snug">
               {% if config.get('vacation_message_external') %}
                 {{ config.get('vacation_message_external')[:80] }}{% if config.get('vacation_message_external')|length > 80 %}…{% endif %}
@@ -594,11 +594,11 @@
         </div>
         <div class="px-5 py-4 space-y-3">
           <div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Empfänger</p>
+            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Recipient</p>
             <p class="text-sm font-medium text-gray-800">{{ config.get('mail_to', '—') }}</p>
           </div>
           <div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Versand</p>
+            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Sending via</p>
             {% if config.get('gmail_oauth_active') %}
             <span class="inline-flex items-center gap-1.5 text-sm text-emerald-700 font-medium">
               <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -609,7 +609,7 @@
               {{ config.get('smtp_host') }}:{{ config.get('smtp_port', '587') }}
             </p>
             {% else %}
-            <p class="text-sm text-gray-400">Nicht konfiguriert</p>
+            <p class="text-sm text-gray-400">Not configured</p>
             {% endif %}
           </div>
         </div>
@@ -618,23 +618,23 @@
       <!-- KI -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-100 bg-gray-50">
-          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">KI-Zusammenfassung</h2>
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">AI summary</h2>
         </div>
         <div class="px-5 py-4">
           {% if config.get('gemini_api_key') %}
           <span class="inline-flex items-center gap-1.5 text-sm text-emerald-700 font-medium">
             <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-            Gemini aktiv
+            Gemini active
           </span>
           {% elif config.get('openai_api_key') %}
           <span class="inline-flex items-center gap-1.5 text-sm text-emerald-700 font-medium">
             <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-            OpenAI aktiv
+            OpenAI active
           </span>
           {% else %}
           <span class="inline-flex items-center gap-1.5 text-sm text-gray-400">
             <span class="w-2 h-2 rounded-full bg-gray-300"></span>
-            Nicht aktiv
+            Not active
           </span>
           {% endif %}
         </div>
@@ -647,7 +647,7 @@
         </div>
         <div class="px-5 py-4">
           <p class="text-sm font-medium text-gray-800">
-            alle {{ config.get('poll_interval', '15') }} Minuten
+            every {{ config.get('poll_interval', '15') }} minutes
           </p>
         </div>
       </div>
@@ -661,7 +661,7 @@
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        Bot ist bereit — Status anzeigen
+        Bot is ready — show status
       </a>
       <a href="/setup"
          class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white hover:bg-gray-50 text-gray-600 text-sm font-medium rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2">
@@ -669,12 +669,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        Einstellungen ändern
+        Change settings
       </a>
     </div>
 
     <p class="text-xs text-gray-400 text-center mt-4">
-      Setup-Zugang ist durch ein Passwort geschützt. Token werden verschlüsselt gespeichert.
+      Setup access is password-protected. Tokens are stored encrypted.
     </p>
     {% endif %}
 
@@ -683,9 +683,9 @@
   <!-- Footer -->
   <footer class="border-t border-gray-200 bg-white mt-auto">
     <div class="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-      <p class="text-xs text-gray-400">Webex Vacation Bot — Einrichtungsassistent</p>
+      <p class="text-xs text-gray-400">Webex Vacation Bot — Setup assistant</p>
       {% if step != "summary" %}
-      <p class="text-xs text-gray-300">Schritt {{ step }} von 3</p>
+      <p class="text-xs text-gray-300">Step {{ step }} of 3</p>
       {% endif %}
     </div>
   </footer>

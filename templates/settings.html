@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webex Vacation Bot – Einstellungen</title>
+  <title>Webex Vacation Bot – Settings</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -18,7 +18,7 @@
 
   {% if demo %}
   <div class="bg-amber-400 text-amber-950 text-center text-xs font-semibold py-1.5 tracking-wide">
-    DEMO-MODUS — Änderungen werden gespeichert, aber es gehen keine echten Webex-Aufrufe raus
+    DEMO MODE — changes are saved, but no real Webex calls are made
   </div>
   {% endif %}
 
@@ -31,7 +31,7 @@
               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </div>
-        <h1 class="text-lg font-semibold text-gray-900 tracking-tight">Einstellungen</h1>
+        <h1 class="text-lg font-semibold text-gray-900 tracking-tight">Settings</h1>
       </div>
       <a href="/" class="text-sm text-gray-400 hover:text-accent-600 transition-colors">← Status</a>
     </div>
@@ -41,105 +41,105 @@
 
     {% if saved %}
     <div class="mb-6 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-700">
-      Einstellungen gespeichert.
+      Settings saved.
     </div>
     {% endif %}
 
     <form method="POST" action="/settings" class="space-y-6">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
-      <!-- Urlaub -->
+      <!-- Vacation -->
       <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Urlaub</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Vacation</h2>
         <div>
-          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="vacation_end">Rückkehrdatum</label>
+          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="vacation_end">Return date</label>
           <input id="vacation_end" name="vacation_end" type="date" value="{{ config.vacation_end or config.end_date or '' }}"
             class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
-          <p class="mt-1 text-xs text-gray-400">Der Bot deaktiviert sich an diesem Tag automatisch.</p>
+          <p class="mt-1 text-xs text-gray-400">The bot deactivates itself automatically on this day.</p>
         </div>
         <div>
-          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="internal_domain">Interne Domain</label>
+          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="internal_domain">Internal domain</label>
           <input id="internal_domain" name="internal_domain" type="text" value="{{ config.internal_domain or 'cisco.com' }}"
             class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
-          <p class="mt-1 text-xs text-gray-400">Kontakte mit dieser Domain bekommen die interne Vorlage.</p>
+          <p class="mt-1 text-xs text-gray-400">Contacts with this domain get the internal template.</p>
         </div>
       </section>
 
-      <!-- Vorlagen -->
+      <!-- Reply templates -->
       <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Antwort-Vorlagen</h2>
-        <p class="text-xs text-gray-400">Platzhalter <span class="font-mono">{end_date}</span> wird durch dein Rückkehrdatum ersetzt.</p>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Reply templates</h2>
+        <p class="text-xs text-gray-400">The <span class="font-mono">{end_date}</span> placeholder is replaced with your return date.</p>
         <div>
-          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="vacation_message_internal">Intern</label>
+          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="vacation_message_internal">Internal</label>
           <textarea id="vacation_message_internal" name="vacation_message_internal" rows="3"
             class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm">{{ config.vacation_message_internal or '' }}</textarea>
         </div>
         <div>
-          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="vacation_message_external">Extern</label>
+          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="vacation_message_external">External</label>
           <textarea id="vacation_message_external" name="vacation_message_external" rows="3"
             class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm">{{ config.vacation_message_external or '' }}</textarea>
         </div>
       </section>
 
-      <!-- E-Mail-Report -->
+      <!-- Email report -->
       <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">E-Mail-Report (optional)</h2>
-        <p class="text-xs text-gray-400">Leer lassen, um den Report zu deaktivieren.</p>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Email report (optional)</h2>
+        <p class="text-xs text-gray-400">Leave blank to disable the report.</p>
         <div>
-          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="mail_to">Empfänger</label>
+          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="mail_to">Recipient</label>
           <input id="mail_to" name="mail_to" type="email" value="{{ config.mail_to or '' }}"
             class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="smtp_host">SMTP-Host</label>
+            <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="smtp_host">SMTP host</label>
             <input id="smtp_host" name="smtp_host" type="text" value="{{ config.smtp_host or '' }}"
               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
           </div>
           <div>
-            <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="smtp_port">SMTP-Port</label>
+            <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="smtp_port">SMTP port</label>
             <input id="smtp_port" name="smtp_port" type="text" value="{{ config.smtp_port or '' }}"
               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="smtp_user">SMTP-User</label>
+            <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="smtp_user">SMTP user</label>
             <input id="smtp_user" name="smtp_user" type="text" value="{{ config.smtp_user or '' }}"
               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
           </div>
           <div>
-            <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="smtp_password">SMTP-Passwort</label>
+            <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="smtp_password">SMTP password</label>
             <input id="smtp_password" name="smtp_password" type="password"
-              placeholder="{% if secrets_set.smtp_password %}•••• gesetzt – leer = unverändert{% else %}nicht gesetzt{% endif %}"
+              placeholder="{% if secrets_set.smtp_password %}•••• set – blank = unchanged{% else %}not set{% endif %}"
               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
           </div>
         </div>
       </section>
 
-      <!-- KI-Summary -->
+      <!-- AI summary -->
       <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">KI-Summary (optional)</h2>
-        <p class="text-xs text-gray-400">Sortiert Nachrichten bei Rückkehr in „dringend / kann warten". Ein Key reicht, Gemini hat Vorrang.</p>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">AI summary (optional)</h2>
+        <p class="text-xs text-gray-400">Sorts messages on return into 'urgent / can wait'. One key is enough, Gemini takes priority.</p>
         <div>
           <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="gemini_api_key">Gemini API Key</label>
           <input id="gemini_api_key" name="gemini_api_key" type="password"
-            placeholder="{% if secrets_set.gemini_api_key %}•••• gesetzt – leer = unverändert{% else %}nicht gesetzt{% endif %}"
+            placeholder="{% if secrets_set.gemini_api_key %}•••• set – blank = unchanged{% else %}not set{% endif %}"
             class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
         </div>
         <div>
           <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="openai_api_key">OpenAI API Key</label>
           <input id="openai_api_key" name="openai_api_key" type="password"
-            placeholder="{% if secrets_set.openai_api_key %}•••• gesetzt – leer = unverändert{% else %}nicht gesetzt{% endif %}"
+            placeholder="{% if secrets_set.openai_api_key %}•••• set – blank = unchanged{% else %}not set{% endif %}"
             class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
         </div>
       </section>
 
       <div class="flex items-center justify-end gap-3">
-        <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">Abbrechen</a>
+        <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">Cancel</a>
         <button type="submit"
           class="px-5 py-2 rounded-lg text-sm font-medium bg-accent-600 text-white hover:bg-accent-700 transition-colors">
-          Speichern
+          Save
         </button>
       </div>
     </form>

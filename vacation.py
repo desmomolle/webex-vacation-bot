@@ -20,8 +20,8 @@ MY_EMAIL = os.getenv("MY_WEBEX_EMAIL", "")
 
 # Default templates — can be overridden via env or db config table
 MSG_INTERNAL_DEFAULT = (
-    "⚡ Auto-Reply: Hey, ich bin bis {end_date} im Urlaub und lese keine Nachrichten. "
-    "Ich melde mich wenn ich zurück bin!"
+    "⚡ Auto-reply: Hi, I'm on vacation until {end_date} and not reading messages. "
+    "I'll get back to you when I'm back!"
 )
 MSG_EXTERNAL_DEFAULT = (
     "⚡ Automatic out-of-office reply: Thank you for your message. "
@@ -140,7 +140,7 @@ async def check_vacation_replies() -> dict:
         except ValueError:
             formatted_date = vacation_end
     else:
-        formatted_date = "demnächst"
+        formatted_date = "soon"
     msg_internal = msg_internal.replace("{end_date}", formatted_date)
     msg_external = msg_external.replace("{end_date}", formatted_date)
 
@@ -402,7 +402,7 @@ async def generate_return_summary(period_id: int) -> dict:
     if not replies:
         return {
             "total": 0,
-            "summary": "Keine Nachrichten während deines Urlaubs.",
+            "summary": "No messages during your vacation.",
             "urgent": [],
             "can_wait": [],
         }
@@ -412,23 +412,23 @@ async def generate_return_summary(period_id: int) -> dict:
         for r in replies
     )
 
-    prompt = f"""Stefan kommt aus dem Urlaub zurück. Hier sind alle WebEx-Nachrichten die während seiner Abwesenheit reinkamen:
+    prompt = f"""The user is returning from vacation. Here are all Webex messages that arrived during their absence:
 
 {messages_text}
 
-Sortiere sie in "vermutlich dringend" und "kann warten". Begründe kurz bei den dringenden warum.
+Sort them into "probably urgent" and "can wait". For urgent ones, briefly explain why.
 
-Antworte NUR mit validem JSON:
+Reply ONLY with valid JSON:
 {{
   "urgent": [{{"name": "...", "preview": "...", "reason": "..."}}],
   "can_wait": [{{"name": "...", "preview": "..."}}],
-  "summary": "X Personen haben dir geschrieben. Y davon sehen dringend aus."
+  "summary": "X people messaged you. Y of them look urgent."
 }}"""
 
     def _plain_fallback():
         return {
             "total": len(replies),
-            "summary": f"{len(replies)} Personen haben dir geschrieben: {', '.join(r['person_name'] for r in replies)}",
+            "summary": f"{len(replies)} people messaged you: {', '.join(r['person_name'] for r in replies)}",
             "urgent": [],
             "can_wait": [{"name": r["person_name"], "preview": r["message_preview"]} for r in replies],
         }
@@ -455,7 +455,7 @@ Antworte NUR mit validem JSON:
                     json={
                         "contents": [{"parts": [{"text": prompt}]}],
                         "systemInstruction": {
-                            "parts": [{"text": "Du bist Travis, Stefans digitaler Assistent. Sortiere Nachrichten nach Dringlichkeit. Nur valides JSON."}]
+                            "parts": [{"text": "You are a helpful assistant. Sort messages by urgency. Only valid JSON."}]
                         },
                         "generationConfig": {"temperature": 0.3, "maxOutputTokens": 1024},
                     }
@@ -480,7 +480,7 @@ Antworte NUR mit validem JSON:
                         "temperature": 0.3,
                         "max_tokens": 1024,
                         "messages": [
-                            {"role": "system", "content": "Du bist Travis, Stefans digitaler Assistent. Sortiere Nachrichten nach Dringlichkeit. Nur valides JSON."},
+                            {"role": "system", "content": "You are a helpful assistant. Sort messages by urgency. Only valid JSON."},
                             {"role": "user", "content": prompt},
                         ],
                     }

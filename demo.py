@@ -24,13 +24,13 @@ log = logging.getLogger("vacation-bot.demo")
 DEMO_POLL_SECONDS = int(os.getenv("DEMO_POLL_SECONDS", "30"))
 
 _FAKE_CONTACTS = [
-    ("Anna Schmidt", "anna.schmidt@cisco.com", "Hey, hast du die Quartalszahlen schon gesehen?"),
-    ("Tom Becker", "tbecker@partner-gmbh.de", "Passt der Termin am Donnerstag?"),
-    ("Julia Wagner", "julia.wagner@cisco.com", "Kannst du mir bei der Demo-Umgebung helfen?"),
-    ("Mark Hoffmann", "m.hoffmann@kunde.com", "Danke, schöne Ferien!"),
-    ("Priya Patel", "priya.patel@cisco.com", "Kurze Frage zum Renewal — ruf mich an wenn du zurück bist."),
-    ("Lukas Maier", "lukas@startup.io", "Wollte nur Hallo sagen, viel Spaß im Urlaub!"),
-    ("Sandra Klein", "sandra.klein@cisco.com", "Das Deck für Montag — kannst du nochmal drüberschauen?"),
+    ("Anna Schmidt", "anna.schmidt@cisco.com", "Hey, have you seen the quarterly numbers yet?"),
+    ("Tom Becker", "tbecker@partner-gmbh.de", "Does Thursday work for the meeting?"),
+    ("Julia Wagner", "julia.wagner@cisco.com", "Could you help me with the demo environment?"),
+    ("Mark Hoffmann", "m.hoffmann@kunde.com", "Thanks, enjoy your holiday!"),
+    ("Priya Patel", "priya.patel@cisco.com", "Quick question about the renewal — call me when you're back."),
+    ("Lukas Maier", "lukas@startup.io", "Just wanted to say hi, have a great vacation!"),
+    ("Sandra Klein", "sandra.klein@cisco.com", "The deck for Monday — could you take another look?"),
 ]
 
 

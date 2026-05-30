@@ -1,34 +1,34 @@
 # Webex Vacation Auto-Reply Bot
 
-Automatische Abwesenheitsantworten für Webex — ähnlich einer E-Mail-Abwesenheitsnotiz, aber für Webex-Direktnachrichten.
+Automatic out-of-office auto-replies for Webex — similar to an email out-of-office notice, but for Webex direct messages.
 
-**Was er tut:**
-- Pollt deine Webex-DMs alle 15 Minuten
-- Antwortet jeder Person genau einmal pro Urlaubsphase
-- Unterscheidet automatisch zwischen internen und externen Kontakten (konfigurierbare Domain)
-- Vollständiges Protokoll: wer wann geschrieben hat
-- Deaktiviert sich automatisch am Rückkehrdatum
-- Bot per Klick aktivieren/deaktivieren — kein Terminal nötig
+**What it does:**
+- Polls your Webex DMs every 15 minutes
+- Replies to each person exactly once per vacation period
+- Automatically distinguishes between internal and external contacts (configurable internal domain)
+- Complete log: who wrote when
+- Automatically disables itself on the return date
+- Bot can be activated/deactivated with a single click — no terminal required
 
-**Was er NICHT tut:**
-- Gruppenräume oder Spaces beantworten (nur 1:1 DMs)
-- Nachrichten weiterleiten oder speichern
+**What it does NOT do:**
+- Reply in group rooms or spaces (1:1 DMs only)
+- Forward or store messages
 
-**Voraussetzungen:**
-- Docker Desktop (Windows/Mac) oder Docker auf Linux/NAS
-- Webex-Account + einmalige App-Registrierung (~5 Minuten)
-- Keine Programmierkenntnisse nötig
+**Requirements:**
+- Docker Desktop (Windows/Mac) or Docker on Linux/NAS
+- Webex account + one-time app registration (~5 minutes)
+- No programming knowledge required
 
 |  |  |
 |---|---|
-| ![Login](docs/screenshot-login.png) | ![Status-Seite](docs/screenshot-status.png) |
-| *Passwortgeschützter Login* | *Status-Seite mit Protokoll* |
+| ![Login](docs/screenshot-login.png) | ![Status page](docs/screenshot-status.png) |
+| *Password-protected sign in* | *Status page with log* |
 
 ---
 
-## ⚡ Sofort ausprobieren (Demo-Modus)
+## ⚡ Try it instantly (Demo mode)
 
-Den ganzen Bot durchklicken — **ohne Webex-Account, ohne Registrierung, ohne Credentials**:
+Click through the entire bot — **without a Webex account, without registration, without credentials**:
 
 ```bash
 git clone https://github.com/desmomolle/webex-vacation-bot.git
@@ -36,33 +36,33 @@ cd webex-vacation-bot
 docker compose run --rm -e DEMO_MODE=true -p 8080:8080 webex-vacation-bot
 ```
 
-Dann **[http://localhost:8080](http://localhost:8080)** öffnen, Passwort: **`demo`**.
+Then open **[http://localhost:8080](http://localhost:8080)**, password: **`demo`**.
 
-Im Demo-Modus werden **keine** echten Webex-/Mail-/LLM-Aufrufe gemacht. Stattdessen:
-- Beispiel-Protokoll wird vorbefüllt,
-- der „Bei Webex autorisieren"-Schritt im Wizard wird simuliert (du kannst ihn komplett durchklicken),
-- alle paar Sekunden „kommt" eine neue Demo-Nachricht rein, sodass sich das Protokoll live füllt.
+In demo mode, **no** real Webex/mail/LLM calls are made. Instead:
+- Sample log data is pre-populated,
+- the "Authorize with Webex" step in the wizard is simulated (you can click through it completely),
+- every few seconds a new demo message "arrives", so the log fills up live.
 
-![Demo-Modus](docs/screenshot-demo.png)
+![Demo mode](docs/screenshot-demo.png)
 
 ---
 
-## Schnellstart
+## Quick start
 
-> **Tipp für Synology/QNAP:** Schritt 3 entfällt — alles im Browser. Kein Terminal nötig.
+> **Tip for Synology/QNAP:** Step 3 is not needed — everything runs in the browser. No terminal required.
 
-### 1. Webex App registrieren
+### 1. Register a Webex app
 
-Öffne [developer.webex.com](https://developer.webex.com) → **My Webex Apps** → **Create a New App** → **Integration**
+Open [developer.webex.com](https://developer.webex.com) → **My Webex Apps** → **Create a New App** → **Integration**
 
-Wichtige Felder:
+Important fields:
 - **Redirect URI:** `http://localhost:8080/setup/webex/callback`
-  *(Auf NAS: `http://nas-ip:8080/setup/webex/callback`)*
+  *(On NAS: `http://nas-ip:8080/setup/webex/callback`)*
 - **Scopes:** `spark:messages_write`, `spark:rooms_read`, `spark:memberships_read`
 
-Kopiere **Client ID** und **Client Secret**.
+Copy **Client ID** and **Client Secret**.
 
-### 2. Projekt herunterladen & konfigurieren
+### 2. Download & configure the project
 
 ```bash
 git clone https://github.com/desmomolle/webex-vacation-bot.git
@@ -70,89 +70,89 @@ cd webex-vacation-bot
 cp .env.example .env
 ```
 
-Öffne `.env` und trage ein:
+Open `.env` and fill in:
 ```
 MY_WEBEX_EMAIL=dein.name@cisco.com
 WEBEX_CLIENT_ID=...
 WEBEX_CLIENT_SECRET=...
 ```
 
-### 3. Bot starten
+### 3. Start the bot
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Setup im Browser abschließen
+### 4. Complete setup in the browser
 
-Öffne **[http://localhost:8080/setup](http://localhost:8080/setup)**
-*(Auf NAS: `http://nas-ip:8080/setup`)*
+Open **[http://localhost:8080/setup](http://localhost:8080/setup)**
+*(On NAS: `http://nas-ip:8080/setup`)*
 
-Das Zugangs-Passwort steht in den Logs:
+The access password is shown in the logs:
 ```bash
 docker logs webex-vacation-bot 2>&1 | grep "ACCESS PASSWORD"
 ```
 
-Mit diesem Passwort meldest du dich an — es schützt sowohl die Status-Seite
-als auch den Einrichtungs-Wizard. Setze `SETUP_PASSWORD=...` in der `.env`,
-wenn du ein festes Passwort möchtest.
+Use this password to sign in — it protects both the Status page
+and the setup wizard. Set `SETUP_PASSWORD=...` in `.env`
+if you prefer a fixed password.
 
-Der Wizard führt dich durch:
-1. Webex autorisieren (Browser-Login, einmalig)
-2. Urlaubskonfiguration (Rückkehrdatum, Templates, interne Domain)
-3. Optionales (E-Mail-Report, KI-Summary)
-4. Zusammenfassung & Bot starten
+The wizard guides you through:
+1. Authorize Webex (browser sign-in, one-time)
+2. Vacation configuration (return date, reply templates, internal domain)
+3. Optional settings (email report, AI summary)
+4. Summary & start the bot
 
-**Fertig.** Status und Steuerung unter [http://localhost:8080](http://localhost:8080).
+**Done.** Status and controls at [http://localhost:8080](http://localhost:8080).
 
 ---
 
-## Bot steuern
+## Controlling the bot
 
-**Per Browser:**
-`http://localhost:8080` → Button **"Deaktivieren"** oder **"Aktivieren"** — kein Terminal nötig.
+**Via browser:**
+`http://localhost:8080` → click **"Deactivate"** or **"Activate"** — no terminal required.
 
-Der Bot deaktiviert sich außerdem automatisch am konfigurierten Rückkehrdatum.
+The bot also automatically disables itself on the configured return date.
 
-**Container stoppen** (vollständig beenden):
+**Stop the container** (shut down completely):
 ```bash
 docker compose down
 ```
 
 ---
 
-## Deployment-Varianten
+## Deployment options
 
 ### Windows / Mac (Docker Desktop)
 
-Genau wie im Schnellstart. Docker Desktop muss beim Start laufen (`restart: unless-stopped` sorgt für Autostart).
+Exactly as in Quick start. Docker Desktop must be running at startup (`restart: unless-stopped` ensures autostart).
 
 ### Linux
 
 ```bash
-curl -fsSL https://get.docker.com | sh   # Docker installieren
+curl -fsSL https://get.docker.com | sh   # Install Docker
 docker compose up -d
 ```
 Browser → `http://localhost:8080/setup`
 
 ### Synology NAS (DSM 7.2+)
 
-1. **Container Manager** → **Projekt** → **Erstellen**
-2. Projektdateien in einen NAS-Ordner hochladen (z.B. `/docker/webex-vacation-bot`)
-3. `docker-compose.yml` auswählen
-4. Umgebungsvariablen setzen: `MY_WEBEX_EMAIL`, `WEBEX_CLIENT_ID`, `WEBEX_CLIENT_SECRET`
-5. Container starten → Browser: `http://nas-ip:8080/setup`
+1. **Container Manager** → **Project** → **Create**
+2. Upload the project files to a NAS folder (e.g. `/docker/webex-vacation-bot`)
+3. Select `docker-compose.yml`
+4. Set environment variables: `MY_WEBEX_EMAIL`, `WEBEX_CLIENT_ID`, `WEBEX_CLIENT_SECRET`
+5. Start container → Browser: `http://nas-ip:8080/setup`
 
-Alles weitere im Wizard — kein Terminal, kein Python.
+Everything else is handled by the wizard — no terminal, no Python.
 
 ### QNAP NAS
 
-1. **Container Station** → **Anwendungen** → **Erstellen**
-2. `docker-compose.yml` hochladen
-3. Umgebungsvariablen setzen: `MY_WEBEX_EMAIL`, `WEBEX_CLIENT_ID`, `WEBEX_CLIENT_SECRET`
-4. Container starten → Browser: `http://nas-ip:8080/setup`
+1. **Container Station** → **Applications** → **Create**
+2. Upload `docker-compose.yml`
+3. Set environment variables: `MY_WEBEX_EMAIL`, `WEBEX_CLIENT_ID`, `WEBEX_CLIENT_SECRET`
+4. Start container → Browser: `http://nas-ip:8080/setup`
 
-> NAS-Vorteil: Bot läuft 24/7 ohne PC. SQLite-Datei liegt im NAS-Volume und wird automatisch mitgesichert.
+> NAS advantage: The bot runs 24/7 without a PC. The SQLite file lives in the NAS volume and is backed up automatically.
 
 ### Raspberry Pi
 
@@ -164,26 +164,26 @@ Browser → `http://raspberry-pi-ip:8080/setup`
 
 ---
 
-## Optional — E-Mail-Report bei Urlaubsende
+## Optional — Email report at vacation end
 
-Konfigurierbar im Setup-Wizard (Schritt 3) oder manuell in `.env`:
+Configurable in the setup wizard (step 3) or manually in `.env`:
 
-### Option A — Gmail OAuth (empfohlen, kein App-Passwort)
+### Option A — Gmail OAuth (recommended, no app password)
 
-1. [Google Cloud Console](https://console.cloud.google.com) → Gmail API aktivieren → OAuth 2.0 Client ID erstellen (Typ: Desktop)
-2. Im Wizard: Gmail-Button klicken → Browser-Login → fertig
+1. [Google Cloud Console](https://console.cloud.google.com) → Enable Gmail API → Create OAuth 2.0 Client ID (type: Desktop)
+2. In the wizard: click the Gmail button → browser sign-in → done
 
-Oder manuell:
+Or manually:
 ```
 GMAIL_CLIENT_ID=...
 GMAIL_CLIENT_SECRET=...
 MAIL_TO=dein.name@cisco.com
 ```
-Dann einmalig im Projektordner: `python get_gmail_token.py`
+Then run once in the project folder: `python get_gmail_token.py`
 
 ### Option B — SMTP
 
-Im Wizard konfigurierbar oder in `.env`:
+Configurable in the wizard or in `.env`:
 ```
 MAIL_TO=dein.name@cisco.com
 SMTP_HOST=smtp.office365.com
@@ -191,77 +191,77 @@ SMTP_PORT=587
 SMTP_USER=dein.name@firma.com
 SMTP_PASSWORD=...
 ```
-Funktioniert mit Outlook, Cisco Mail, Gmail (App-Passwort).
+Works with Outlook, Cisco Mail, Gmail (app password).
 
 ---
 
-## Optional — KI-Summary
+## Optional — AI summary
 
-Klassifiziert Nachrichten bei Urlaubsende automatisch in "dringend / kann warten".
+Automatically classifies messages at vacation end as "urgent / can wait".
 
-Im Wizard (Schritt 3) oder in `.env` — einen Key reicht, Gemini hat Vorrang:
+In the wizard (step 3) or in `.env` — one key is enough, Gemini takes priority:
 ```
-GEMINI_API_KEY=...    # Google Gemini Flash (empfohlen)
+GEMINI_API_KEY=...    # Google Gemini Flash (recommended)
 OPENAI_API_KEY=...    # OpenAI GPT-4o-mini
 ```
-Kosten: einmaliger Call bei Urlaubsende, < 1000 Tokens → Cent-Bereich.
+Cost: a single call at vacation end, < 1000 tokens → cents.
 
 ---
 
-## Logs & Diagnose
+## Logs & diagnostics
 
-**Live-Logs:**
+**Live logs:**
 ```bash
 docker logs webex-vacation-bot -f
 ```
 
-**Zugangs-Passwort aus Logs lesen:**
+**Read access password from logs:**
 ```bash
 docker logs webex-vacation-bot 2>&1 | grep "ACCESS PASSWORD"
 ```
 
-**Auf Synology:** Container Manager → Container auswählen → Tab **"Log"**
+**On Synology:** Container Manager → select container → **"Log"** tab
 
-**Auf QNAP:** Container Station → Container → **"Protokoll"**
+**On QNAP:** Container Station → Container → **"Log"**
 
-**Typische Log-Meldungen:**
-- `Poll result:` — Ergebnis des 15-Minuten-Checks
-- `Replied to:` — wer eine Antwort erhalten hat
-- `vacation ended — auto-disabled` — Bot hat sich automatisch deaktiviert
-- `Token refresh` — Webex-Token wurde erneuert (normal, kein Handlungsbedarf)
-- `ACCESS PASSWORD` — einmalig beim ersten Start (Login-Passwort)
-
----
-
-## Sicherheit
-
-- **Login auf allem** — Status-Seite, Protokoll, API und Wizard sind hinter einem Passwort-Login (signierte Session-Cookies). Ohne Login sieht niemand, wer dir geschrieben hat. Nur `/health` ist öffentlich. Passwort wird beim ersten Start automatisch generiert und in den Logs angezeigt; festes Passwort: `SETUP_PASSWORD=...` in `.env`.
-- **Tokens verschlüsselt** — `data/tokens.json` ist von Anfang an Fernet-verschlüsselt (auch direkt nach der Einrichtung). Key in `data/.key`, wird automatisch beim ersten Start erzeugt.
-- **`data/`-Ordner sichern** — enthält Verschlüsselungs-Key, Session-Key + Datenbank. Ohne den Key sind gespeicherte Tokens nicht wiederherstellbar.
-- **OAuth abgesichert** — der `state`-Parameter wird gegen einen einmaligen Cookie validiert (Schutz gegen OAuth-CSRF / Code-Injection).
-- **Secrets maskiert** — Client Secret, API-Keys und SMTP-Passwort werden in der Summary nur als `abcd****` angezeigt.
-- **CSRF-Schutz** — alle Formulare und die Toggle-API per Double-Submit-Token gesichert; Session-Cookies mit `SameSite=Lax`, `secure` automatisch bei HTTPS.
-
-> Port 8080 sollte **nicht** direkt aus dem Internet erreichbar sein. Für externen Zugriff: VPN oder Cloudflare Tunnel mit Access-Policy nutzen.
+**Typical log messages:**
+- `Poll result:` — result of the 15-minute check
+- `Replied to:` — who received a reply
+- `vacation ended — auto-disabled` — bot automatically deactivated itself
+- `Token refresh` — Webex token was renewed (normal, no action needed)
+- `ACCESS PASSWORD` — shown once at first startup (sign-in password)
 
 ---
 
-## Häufige Fragen
+## Security
 
-**Der Wizard öffnet sich, aber Webex-Autorisierung schlägt fehl**
-→ Redirect URI in developer.webex.com prüfen: muss exakt `http://localhost:8080/setup/webex/callback` lauten (oder NAS-IP statt localhost).
+- **Login on everything** — Status page, log, API, and wizard are all behind a password sign-in (signed session cookies). Without signing in, nobody can see who wrote to you. Only `/health` is public. The password is generated automatically at first startup and shown in the logs; fixed password: `SETUP_PASSWORD=...` in `.env`.
+- **Tokens encrypted** — `data/tokens.json` is Fernet-encrypted from the start (including right after setup). Key stored in `data/.key`, generated automatically at first startup.
+- **Back up the `data/` folder** — contains the encryption key, session key, and database. Without the key, stored tokens cannot be recovered.
+- **OAuth secured** — the `state` parameter is validated against a one-time cookie (protection against OAuth CSRF / code injection).
+- **Secrets masked** — Client Secret, API keys, and SMTP password are shown in the summary as `abcd****` only.
+- **CSRF protection** — all forms and the toggle API are secured with a double-submit token; session cookies use `SameSite=Lax`, `secure` automatically with HTTPS.
+
+> Port 8080 should **not** be directly accessible from the internet. For external access: use a VPN or a Cloudflare Tunnel with an Access policy.
+
+---
+
+## FAQ
+
+**The wizard opens, but Webex authorization fails**
+→ Check the Redirect URI in developer.webex.com: it must be exactly `http://localhost:8080/setup/webex/callback` (or NAS IP instead of localhost).
 
 **"Token refresh failed"**
-→ Client ID oder Client Secret falsch. Werte aus developer.webex.com erneut kopieren und im Wizard neu eingeben.
+→ Client ID or Client Secret is wrong. Copy the values from developer.webex.com again and re-enter them in the wizard.
 
-**Status-Seite zeigt immer "Inaktiv"**
-→ Im Wizard Schritt 2 prüfen ob Urlaubskonfiguration gespeichert wurde, oder direkt auf `http://localhost:8080` den Aktivieren-Button klicken.
+**Status page always shows "Inactive"**
+→ In wizard step 2, check whether the vacation configuration was saved, or click the Activate button directly at `http://localhost:8080`.
 
-**Der Bot antwortet nicht auf Testnachrichten**
-→ Nachrichten müssen 1:1 DMs sein (keine Gruppenräume). Logs prüfen: `docker logs webex-vacation-bot`.
+**The bot does not reply to test messages**
+→ Messages must be 1:1 DMs (no group rooms). Check the logs: `docker logs webex-vacation-bot`.
 
-**Nachrichten aus der Vergangenheit werden beantwortet**
-→ Normales Verhalten beim ersten Start. Der Bot verarbeitet alle DMs ab dem Urlaubsphasen-Start. Antworten werden nie doppelt gesendet.
+**Messages from the past are being replied to**
+→ Normal behavior on first startup. The bot processes all DMs from the start of the vacation period. Replies are never sent twice.
 
-**Wie sehe ich wer mir geschrieben hat?**
-→ Status-Seite `http://localhost:8080` zeigt das vollständige Protokoll. Optional: E-Mail-Report nach Urlaubsende konfigurieren.
+**How do I see who wrote to me?**
+→ The Status page at `http://localhost:8080` shows the complete log. Optionally, configure an email report at vacation end.

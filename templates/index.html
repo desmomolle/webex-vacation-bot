@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,7 +32,7 @@
 
   {% if demo %}
   <div class="bg-amber-400 text-amber-950 text-center text-xs font-semibold py-1.5 tracking-wide">
-    DEMO-MODUS — keine echten Webex-Aufrufe, alle Daten sind Beispieldaten
+    DEMO MODE — no real Webex calls, all data is sample data
   </div>
   {% endif %}
 
@@ -54,20 +54,20 @@
         {% if status.enabled %}
         <span id="status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Aktiv
+          Active
         </span>
         <button onclick="toggleBot()" id="toggle-btn"
           class="px-3 py-1.5 rounded-lg text-sm font-medium bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors">
-          Deaktivieren
+          Deactivate
         </button>
         {% else %}
         <span id="status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-500 border border-gray-200">
           <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-          Inaktiv
+          Inactive
         </span>
         <button onclick="toggleBot()" id="toggle-btn"
           class="px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors">
-          Aktivieren
+          Activate
         </button>
         {% endif %}
       </div>
@@ -89,7 +89,7 @@
         location.reload();
       } catch(e) {
         btn.disabled = false;
-        btn.textContent = 'Fehler – nochmal';
+        btn.textContent = 'Error – retry';
       }
     }
   </script>
@@ -105,21 +105,21 @@
       <div class="px-6 py-5 grid grid-cols-1 sm:grid-cols-3 gap-6">
 
         <div>
-          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Urlaubsende</p>
+          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Return date</p>
           <p class="text-base font-semibold text-gray-800">
             {{ status.end_date if status.end_date else '—' }}
           </p>
         </div>
 
         <div>
-          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Letzter Poll</p>
+          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Last poll</p>
           <p class="text-base font-semibold text-gray-800">
             {{ status.last_check if status.last_check else '—' }}
           </p>
         </div>
 
         <div>
-          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Replies gesamt</p>
+          <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">Total replies</p>
           <p class="text-base font-semibold text-gray-800">
             {{ status.recent_replies | length }}
           </p>
@@ -129,7 +129,7 @@
       {% if status.current_period_id %}
       <div class="px-6 pb-4">
         <p class="text-xs text-gray-400">
-          Urlaubs-Periode ID: <span class="font-mono text-gray-600">#{{ status.current_period_id }}</span>
+          Vacation period ID: <span class="font-mono text-gray-600">#{{ status.current_period_id }}</span>
         </p>
       </div>
       {% endif %}
@@ -139,7 +139,7 @@
     {% if status.summary %}
     <section class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Zusammenfassung</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Summary</h2>
       </div>
       <div class="px-6 py-5 space-y-5">
 
@@ -151,7 +151,7 @@
 
           {% if status.summary.urgent %}
           <div>
-            <h3 class="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Dringend</h3>
+            <h3 class="text-xs font-semibold text-red-600 uppercase tracking-wide mb-2">Urgent</h3>
             <ul class="space-y-1">
               {% for item in status.summary.urgent %}
               <li class="flex items-start gap-2 text-sm text-gray-700">
@@ -165,7 +165,7 @@
 
           {% if status.summary.can_wait %}
           <div>
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Kann warten</h3>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Can wait</h3>
             <ul class="space-y-1">
               {% for item in status.summary.can_wait %}
               <li class="flex items-start gap-2 text-sm text-gray-700">
@@ -185,9 +185,9 @@
     <!-- Protocol Table -->
     <section class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Protokoll</h2>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Log</h2>
         {% if status.recent_replies %}
-        <span class="text-xs text-gray-400">{{ status.recent_replies | length }} Einträge</span>
+        <span class="text-xs text-gray-400">{{ status.recent_replies | length }} entries</span>
         {% endif %}
       </div>
 
@@ -197,9 +197,9 @@
           <thead>
             <tr class="text-left text-xs text-gray-400 uppercase tracking-wide border-b border-gray-100">
               <th class="px-6 py-3 font-medium">Person</th>
-              <th class="px-6 py-3 font-medium">E-Mail</th>
-              <th class="px-6 py-3 font-medium">Nachrichtenvorschau</th>
-              <th class="px-6 py-3 font-medium whitespace-nowrap">Zeitpunkt</th>
+              <th class="px-6 py-3 font-medium">Email</th>
+              <th class="px-6 py-3 font-medium">Message preview</th>
+              <th class="px-6 py-3 font-medium whitespace-nowrap">Time</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50">
@@ -230,7 +230,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
-        <p class="text-sm text-gray-400">Noch keine Einträge in diesem Zeitraum.</p>
+        <p class="text-sm text-gray-400">No entries in this period yet.</p>
       </div>
       {% endif %}
     </section>
@@ -241,9 +241,9 @@
   <footer class="border-t border-gray-200 bg-white mt-auto">
     <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <a href="/settings" class="text-xs text-gray-400 hover:text-accent-600 transition-colors">Einstellungen</a>
-        <a href="/setup" class="text-xs text-gray-400 hover:text-accent-600 transition-colors">Einrichtung</a>
-        <a href="/logout" class="text-xs text-gray-400 hover:text-accent-600 transition-colors">Abmelden</a>
+        <a href="/settings" class="text-xs text-gray-400 hover:text-accent-600 transition-colors">Settings</a>
+        <a href="/setup" class="text-xs text-gray-400 hover:text-accent-600 transition-colors">Setup</a>
+        <a href="/logout" class="text-xs text-gray-400 hover:text-accent-600 transition-colors">Sign out</a>
       </div>
       <p class="text-xs text-gray-300 font-mono">{{ status.last_check or '' }}</p>
     </div>

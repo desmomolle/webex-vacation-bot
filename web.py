@@ -228,7 +228,7 @@ async def handle_login_post(request: web.Request) -> web.Response:
         csrf_token = _get_csrf_token(request)
         response = aiohttp_jinja2.render_template(
             "login.html", request,
-            {"csrf_token": csrf_token, "next": nxt, "error": "Falsches Passwort.",
+            {"csrf_token": csrf_token, "next": nxt, "error": "Wrong password.",
              "demo": demo.is_demo()},
         )
         response.set_status(401)

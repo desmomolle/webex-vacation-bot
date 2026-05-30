@@ -5,9 +5,9 @@
 header = """
 # Changelog
 
-Alle nennenswerten Änderungen an diesem Projekt.
-Format nach [Keep a Changelog](https://keepachangelog.com),
-Gruppierung nach [Conventional Commits](https://www.conventionalcommits.org).
+All notable changes to this project.
+Format based on [Keep a Changelog](https://keepachangelog.com),
+grouping by [Conventional Commits](https://www.conventionalcommits.org).
 """
 body = """
 {% if version %}\

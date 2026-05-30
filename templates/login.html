@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webex Vacation Bot – Login</title>
+  <title>Webex Vacation Bot – Sign in</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -18,7 +18,7 @@
 
   {% if demo %}
   <div class="fixed top-0 inset-x-0 bg-amber-400 text-amber-950 text-center text-xs font-semibold py-1.5 tracking-wide">
-    DEMO-MODUS — Passwort: <span class="font-mono">demo</span>
+    DEMO MODE — Password: <span class="font-mono">demo</span>
   </div>
   {% endif %}
 
@@ -34,7 +34,7 @@
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Anmelden</h2>
+      <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Sign in</h2>
 
       {% if error %}
       <div class="mb-4 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600">
@@ -46,20 +46,20 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <input type="hidden" name="next" value="{{ next }}" />
         <div>
-          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="password">Passwort</label>
+          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="password">Password</label>
           <input id="password" name="password" type="password" autofocus required
             class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
         </div>
         <button type="submit"
           class="w-full px-3 py-2 rounded-lg text-sm font-medium bg-accent-600 text-white hover:bg-accent-700 transition-colors">
-          Einloggen
+          Sign in
         </button>
       </form>
 
       <p class="mt-4 text-xs text-gray-400 leading-relaxed">
-        Das Passwort steht beim ersten Start in den Logs
-        (<span class="font-mono">ACCESS PASSWORD</span>) oder ist in der
-        <span class="font-mono">.env</span> als <span class="font-mono">SETUP_PASSWORD</span> gesetzt.
+        The password is shown on first start in the logs
+        (<span class="font-mono">ACCESS PASSWORD</span>) or is set in the
+        <span class="font-mono">.env</span> file as <span class="font-mono">SETUP_PASSWORD</span>.
       </p>
     </div>
   </div>

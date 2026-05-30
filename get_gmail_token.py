@@ -1,15 +1,15 @@
 """
-Einmaliges Setup-Script: Gmail OAuth2 Token holen.
+One-time setup script: fetch Gmail OAuth2 token.
 
-Voraussetzungen:
-  1. Google Cloud Console → Projekt → Gmail API aktivieren
-  2. OAuth 2.0 Client ID erstellen (Typ: Desktop-Anwendung)
-  3. client_secret.json herunterladen und in diesen Ordner legen
-  4. GMAIL_CLIENT_ID + GMAIL_CLIENT_SECRET in .env eintragen
+Prerequisites:
+  1. Google Cloud Console → Project → enable Gmail API
+  2. Create an OAuth 2.0 Client ID (type: Desktop application)
+  3. Download client_secret.json and place it in this directory
+  4. Set GMAIL_CLIENT_ID + GMAIL_CLIENT_SECRET in .env
 
-Ausführen:
+Usage:
   python get_gmail_token.py
-  (einmalig; token wird als gmail_token.json gespeichert)
+  (run once; token is saved as gmail_token.json)
 """
 import json
 import os
@@ -45,10 +45,10 @@ def main() -> None:
         }
         flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
     else:
-        print("FEHLER: client_secret.json nicht gefunden und GMAIL_CLIENT_ID/SECRET nicht in .env.")
+        print("ERROR: client_secret.json not found and GMAIL_CLIENT_ID/SECRET not set in .env.")
         raise SystemExit(1)
 
-    print(">>> Browser öffnet sich für Google-Login …")
+    print(">>> Opening browser for Google login …")
     creds: Credentials = flow.run_local_server(port=0)
 
     token_data = {
@@ -62,8 +62,8 @@ def main() -> None:
 
     TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
     TOKEN_FILE.write_text(json.dumps(token_data, indent=2))
-    print(f"✅ Gmail-Token gespeichert: {TOKEN_FILE}")
-    print("   E-Mail-Versand beim Urlaubsende ist jetzt aktiviert.")
+    print(f"✅ Gmail token saved: {TOKEN_FILE}")
+    print("   Email sending at the end of your vacation is now enabled.")
 
 
 if __name__ == "__main__":
