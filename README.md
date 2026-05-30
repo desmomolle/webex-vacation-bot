@@ -31,9 +31,8 @@ Automatic out-of-office auto-replies for Webex — similar to an email out-of-of
 Click through the entire bot — **without a Webex account, without registration, without credentials**:
 
 ```bash
-git clone https://github.com/desmomolle/webex-vacation-bot.git
-cd webex-vacation-bot
-docker compose run --rm -e DEMO_MODE=true -p 8080:8080 webex-vacation-bot
+docker run --rm -p 8080:8080 -e DEMO_MODE=true \
+  ghcr.io/desmomolle/webex-vacation-bot:latest
 ```
 
 Then open **[http://localhost:8080](http://localhost:8080)**, password: **`demo`**.
@@ -49,7 +48,7 @@ In demo mode, **no** real Webex/mail/LLM calls are made. Instead:
 
 ## Quick start
 
-> **Tip for Synology/QNAP:** Step 3 is not needed — everything runs in the browser. No terminal required.
+> **Tip for Synology/QNAP:** no terminal required — start the image from the GUI (see [Deployment options](#deployment-options)) and do the rest in the browser.
 
 ### 1. Register a Webex app
 
@@ -62,28 +61,38 @@ Important fields:
 
 Copy **Client ID** and **Client Secret**.
 
-### 2. Download & configure the project
+### 2. Run the bot
 
+No source download or build needed — a pre-built multi-arch image
+(amd64 + arm64) is published to GHCR. Pick one:
+
+**A) One command:**
 ```bash
-git clone https://github.com/desmomolle/webex-vacation-bot.git
-cd webex-vacation-bot
-cp .env.example .env
+docker run -d --name webex-vacation-bot -p 8080:8080 \
+  -v webex-vacation-data:/data \
+  ghcr.io/desmomolle/webex-vacation-bot:latest
 ```
 
-Open `.env` and fill in:
+**B) Docker Compose** — create a `docker-compose.yml`:
+```yaml
+services:
+  webex-vacation-bot:
+    image: ghcr.io/desmomolle/webex-vacation-bot:latest
+    container_name: webex-vacation-bot
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
 ```
-MY_WEBEX_EMAIL=dein.name@cisco.com
-WEBEX_CLIENT_ID=...
-WEBEX_CLIENT_SECRET=...
-```
-
-### 3. Start the bot
-
 ```bash
 docker compose up -d
 ```
 
-### 4. Complete setup in the browser
+> No `.env` and no Webex credentials are required up front — you enter
+> everything in the browser wizard. Updating later: `docker compose pull && docker compose up -d`.
+
+### 3. Complete setup in the browser
 
 Open **[http://localhost:8080/setup](http://localhost:8080/setup)**
 *(On NAS: `http://nas-ip:8080/setup`)*
@@ -129,44 +138,70 @@ docker compose down
 
 ## Deployment options
 
-### Windows / Mac (Docker Desktop)
+The image is multi-arch (`linux/amd64` + `linux/arm64`), so the same steps
+work on x86 servers/NAS, Apple Silicon, and ARM boards (Raspberry Pi). The
+only thing that changes per platform is *how* you start the container.
 
-Exactly as in Quick start. Docker Desktop must be running at startup (`restart: unless-stopped` ensures autostart).
-
-### Linux
-
-```bash
-curl -fsSL https://get.docker.com | sh   # Install Docker
-docker compose up -d
-```
-Browser → `http://localhost:8080/setup`
-
-### Synology NAS (DSM 7.2+)
-
-1. **Container Manager** → **Project** → **Create**
-2. Upload the project files to a NAS folder (e.g. `/docker/webex-vacation-bot`)
-3. Select `docker-compose.yml`
-4. Set environment variables: `MY_WEBEX_EMAIL`, `WEBEX_CLIENT_ID`, `WEBEX_CLIENT_SECRET`
-5. Start container → Browser: `http://nas-ip:8080/setup`
-
-Everything else is handled by the wizard — no terminal, no Python.
-
-### QNAP NAS
-
-1. **Container Station** → **Applications** → **Create**
-2. Upload `docker-compose.yml`
-3. Set environment variables: `MY_WEBEX_EMAIL`, `WEBEX_CLIENT_ID`, `WEBEX_CLIENT_SECRET`
-4. Start container → Browser: `http://nas-ip:8080/setup`
-
-> NAS advantage: The bot runs 24/7 without a PC. The SQLite file lives in the NAS volume and is backed up automatically.
-
-### Raspberry Pi
+### Generic Docker (Linux, Windows, macOS)
 
 ```bash
+# Install Docker if needed:
 curl -fsSL https://get.docker.com | sh
-docker compose up -d
+
+docker run -d --name webex-vacation-bot -p 8080:8080 \
+  -v webex-vacation-data:/data \
+  ghcr.io/desmomolle/webex-vacation-bot:latest
 ```
-Browser → `http://raspberry-pi-ip:8080/setup`
+Then open `http://<host>:8080/setup`. `restart: unless-stopped`/`--restart`
+keeps it running across reboots.
+
+### Synology NAS (DSM 7.2+ / Container Manager)
+
+1. **Container Manager** → **Registry** → search `ghcr.io/desmomolle/webex-vacation-bot` *(or use Project + the compose file below)*
+2. **Container Manager** → **Project** → **Create**, paste this `docker-compose.yml`:
+   ```yaml
+   services:
+     webex-vacation-bot:
+       image: ghcr.io/desmomolle/webex-vacation-bot:latest
+       restart: unless-stopped
+       ports: ["8080:8080"]
+       volumes: ["/volume1/docker/webex-vacation-bot:/data"]
+   ```
+3. Start → open `http://nas-ip:8080/setup`. No terminal, no Python.
+
+### QNAP NAS (Container Station)
+
+1. **Container Station** → **Create** → **Create Application**
+2. Paste the same compose as above (adjust the volume path, e.g. `/share/Container/webex-vacation-bot:/data`)
+3. Start → open `http://nas-ip:8080/setup`
+
+> NAS advantage: runs 24/7 without a PC. The `data/` volume holds the SQLite
+> DB + encryption keys and is included in your NAS backups.
+
+### Proxmox VE
+
+Run it in a small Debian LXC (or VM):
+
+1. Create a Debian 12 container (1 vCPU, 512 MB RAM, 4 GB disk is plenty). For
+   an LXC, enable **keyctl** + **nesting** (Options → Features) so Docker works.
+2. Inside the container:
+   ```bash
+   curl -fsSL https://get.docker.com | sh
+   docker run -d --name webex-vacation-bot -p 8080:8080 \
+     -v webex-vacation-data:/data \
+     ghcr.io/desmomolle/webex-vacation-bot:latest
+   ```
+3. Open `http://<lxc-ip>:8080/setup`.
+
+> Tip: pin the LXC/VM to a static IP and use that in the Webex Redirect URI.
+
+### Build from source (development)
+
+```bash
+git clone https://github.com/desmomolle/webex-vacation-bot.git
+cd webex-vacation-bot
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+```
 
 ---
 

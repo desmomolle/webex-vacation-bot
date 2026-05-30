@@ -1,0 +1,7 @@
+# Development override — build the image from source instead of pulling it.
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+services:
+  webex-vacation-bot:
+    build: .
+    image: ghcr.io/desmomolle/webex-vacation-bot:dev
