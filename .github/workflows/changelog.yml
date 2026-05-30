@@ -1,0 +1,13 @@
+name: changelog
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - CHANGELOG.md
+
+jobs:
+  changelog:
+    uses: desmomolle/infrastructure/.github/workflows/changelog.yml@main
+    permissions:
+      contents: write
