@@ -19,6 +19,11 @@ Automatische Abwesenheitsantworten für Webex — ähnlich einer E-Mail-Abwesenh
 - Webex-Account + einmalige App-Registrierung (~5 Minuten)
 - Keine Programmierkenntnisse nötig
 
+|  |  |
+|---|---|
+| ![Login](docs/screenshot-login.png) | ![Status-Seite](docs/screenshot-status.png) |
+| *Passwortgeschützter Login* | *Status-Seite mit Protokoll* |
+
 ---
 
 ## Schnellstart
@@ -62,10 +67,14 @@ docker compose up -d
 Öffne **[http://localhost:8080/setup](http://localhost:8080/setup)**
 *(Auf NAS: `http://nas-ip:8080/setup`)*
 
-Das Passwort für den Wizard steht in den Logs:
+Das Zugangs-Passwort steht in den Logs:
 ```bash
-docker logs webex-vacation-bot 2>&1 | grep "SETUP WIZARD PASSWORD"
+docker logs webex-vacation-bot 2>&1 | grep "ACCESS PASSWORD"
 ```
+
+Mit diesem Passwort meldest du dich an — es schützt sowohl die Status-Seite
+als auch den Einrichtungs-Wizard. Setze `SETUP_PASSWORD=...` in der `.env`,
+wenn du ein festes Passwort möchtest.
 
 Der Wizard führt dich durch:
 1. Webex autorisieren (Browser-Login, einmalig)
@@ -185,9 +194,9 @@ Kosten: einmaliger Call bei Urlaubsende, < 1000 Tokens → Cent-Bereich.
 docker logs webex-vacation-bot -f
 ```
 
-**Setup-Passwort aus Logs lesen:**
+**Zugangs-Passwort aus Logs lesen:**
 ```bash
-docker logs webex-vacation-bot 2>&1 | grep "SETUP WIZARD PASSWORD"
+docker logs webex-vacation-bot 2>&1 | grep "ACCESS PASSWORD"
 ```
 
 **Auf Synology:** Container Manager → Container auswählen → Tab **"Log"**
@@ -199,17 +208,18 @@ docker logs webex-vacation-bot 2>&1 | grep "SETUP WIZARD PASSWORD"
 - `Replied to:` — wer eine Antwort erhalten hat
 - `vacation ended — auto-disabled` — Bot hat sich automatisch deaktiviert
 - `Token refresh` — Webex-Token wurde erneuert (normal, kein Handlungsbedarf)
-- `SETUP WIZARD PASSWORD` — einmalig beim ersten Start
+- `ACCESS PASSWORD` — einmalig beim ersten Start (Login-Passwort)
 
 ---
 
 ## Sicherheit
 
-- **Tokens verschlüsselt** — `data/tokens.json` ist Fernet-verschlüsselt. Key in `data/.key`, wird automatisch beim ersten Start erzeugt.
-- **`data/`-Ordner sichern** — enthält Verschlüsselungs-Key + Datenbank. Ohne den Key sind gespeicherte Tokens nicht wiederherstellbar.
-- **Wizard passwortgeschützt** — Setup-Passwort wird beim ersten Start automatisch generiert und in den Logs angezeigt. Festes Passwort: `SETUP_PASSWORD=...` in `.env`.
+- **Login auf allem** — Status-Seite, Protokoll, API und Wizard sind hinter einem Passwort-Login (signierte Session-Cookies). Ohne Login sieht niemand, wer dir geschrieben hat. Nur `/health` ist öffentlich. Passwort wird beim ersten Start automatisch generiert und in den Logs angezeigt; festes Passwort: `SETUP_PASSWORD=...` in `.env`.
+- **Tokens verschlüsselt** — `data/tokens.json` ist von Anfang an Fernet-verschlüsselt (auch direkt nach der Einrichtung). Key in `data/.key`, wird automatisch beim ersten Start erzeugt.
+- **`data/`-Ordner sichern** — enthält Verschlüsselungs-Key, Session-Key + Datenbank. Ohne den Key sind gespeicherte Tokens nicht wiederherstellbar.
+- **OAuth abgesichert** — der `state`-Parameter wird gegen einen einmaligen Cookie validiert (Schutz gegen OAuth-CSRF / Code-Injection).
 - **Secrets maskiert** — Client Secret, API-Keys und SMTP-Passwort werden in der Summary nur als `abcd****` angezeigt.
-- **CSRF-Schutz** — alle Wizard-Formulare gesichert.
+- **CSRF-Schutz** — alle Formulare und die Toggle-API per Double-Submit-Token gesichert; Session-Cookies mit `SameSite=Lax`, `secure` automatisch bei HTTPS.
 
 > Port 8080 sollte **nicht** direkt aus dem Internet erreichbar sein. Für externen Zugriff: VPN oder Cloudflare Tunnel mit Access-Policy nutzen.
 
