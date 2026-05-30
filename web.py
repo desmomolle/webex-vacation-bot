@@ -518,6 +518,59 @@ async def handle_setup_summary(request: web.Request) -> web.Response:
 
 
 # ---------------------------------------------------------------------------
+# Settings (edit config after setup)
+# ---------------------------------------------------------------------------
+
+_SETTINGS_SECRET_KEYS = ("smtp_password", "gemini_api_key", "openai_api_key")
+
+
+async def handle_settings_get(request: web.Request) -> web.Response:
+    """GET /settings — edit all configuration after the initial wizard."""
+    config = await _all_config()
+    secrets_set = {k: bool(config.get(k)) for k in _SETTINGS_SECRET_KEYS}
+    csrf_token = _get_csrf_token(request)
+    response = aiohttp_jinja2.render_template("settings.html", request, {
+        "config": config,
+        "secrets_set": secrets_set,
+        "saved": request.rel_url.query.get("saved") == "1",
+        "csrf_token": csrf_token,
+        "demo": demo.is_demo(),
+    })
+    _set_cookie(response, request, "csrf_token", csrf_token, samesite="Strict")
+    return response
+
+
+async def handle_settings_post(request: web.Request) -> web.Response:
+    """POST /settings — persist edited configuration."""
+    data = await request.post()
+    if not _validate_csrf(request, data.get("csrf_token", "")):
+        return web.Response(status=403, text="CSRF validation failed")
+
+    # Required fields — only overwrite when a non-empty value is provided
+    vacation_end = data.get("vacation_end", "").strip()
+    if vacation_end:
+        await db.set_config("vacation_end", vacation_end)
+        await db.set_config("end_date", vacation_end)  # keep status display in sync
+
+    for key in ("internal_domain", "vacation_message_internal", "vacation_message_external"):
+        val = data.get(key, "").strip()
+        if val:
+            await db.set_config(key, val)
+
+    # Optional, non-secret — allow clearing
+    for key in ("mail_to", "smtp_host", "smtp_port", "smtp_user"):
+        await db.set_config(key, data.get(key, "").strip())
+
+    # Secrets — only overwrite when a new value is entered (blank keeps current)
+    for key in _SETTINGS_SECRET_KEYS:
+        val = data.get(key, "").strip()
+        if val:
+            await db.set_config(key, val)
+
+    raise web.HTTPFound("/settings?saved=1")
+
+
+# ---------------------------------------------------------------------------
 # App factory
 # ---------------------------------------------------------------------------
 
@@ -550,6 +603,10 @@ def create_app() -> web.Application:
     app.router.add_get("/setup/step3", handle_setup_step3_get)
     app.router.add_post("/setup/step3", handle_setup_step3_post)
     app.router.add_get("/setup/summary", handle_setup_summary)
+
+    # Settings
+    app.router.add_get("/settings", handle_settings_get)
+    app.router.add_post("/settings", handle_settings_post)
 
     return app
 
