@@ -8,6 +8,7 @@ Gruppierung nach [Conventional Commits](https://www.conventionalcommits.org).
 ### CI/CD
 - Auto-changelog via git-cliff reusable workflow (d8a3e84)
 - Inline changelog workflow (public repo can't call private reusable) (3ba7f98)
+- Stricter cliff.toml — drop non-conventional commits via catch-all skip (8fb795f)
 
 ### Documentation
 - Add logs & diagnostics section with platform-specific examples (623954e)
