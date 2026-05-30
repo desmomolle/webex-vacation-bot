@@ -1,8 +1,8 @@
 # Changelog
 
-Alle nennenswerten Änderungen an diesem Projekt.
-Format nach [Keep a Changelog](https://keepachangelog.com),
-Gruppierung nach [Conventional Commits](https://www.conventionalcommits.org).
+All notable changes to this project.
+Format based on [Keep a Changelog](https://keepachangelog.com),
+grouping by [Conventional Commits](https://www.conventionalcommits.org).
 ## [unreleased]
 
 ### Bug Fixes
@@ -22,6 +22,7 @@ Gruppierung nach [Conventional Commits](https://www.conventionalcommits.org).
 - Enable/disable toggle in WebUI, fix status key, README cleanup (d1cc36b)
 - DEMO_MODE — click through the whole app without real credentials (f1c8fa8)
 - Settings page to edit config after setup (1e56489)
+- Translate UI, README, docs and defaults to English (c1410d6)
 
 ### Security
 - Fernet encryption, setup password, CSRF protection (0de1d62)
