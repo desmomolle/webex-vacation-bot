@@ -25,6 +25,7 @@ grouping by [Conventional Commits](https://www.conventionalcommits.org).
 - Translate UI, README, docs and defaults to English (c1410d6)
 - Move vacation activation + return date to the dashboard (b69ebd2)
 - Vacation history clustered by phase + fix current-period wiring (9bf8790)
+- Dashboard shows the latest phase, history shows older phases only (77f8a60)
 
 ### Security
 - Fernet encryption, setup password, CSRF protection (0de1d62)
