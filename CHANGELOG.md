@@ -24,6 +24,7 @@ grouping by [Conventional Commits](https://www.conventionalcommits.org).
 - Settings page to edit config after setup (1e56489)
 - Translate UI, README, docs and defaults to English (c1410d6)
 - Move vacation activation + return date to the dashboard (b69ebd2)
+- Vacation history clustered by phase + fix current-period wiring (9bf8790)
 
 ### Security
 - Fernet encryption, setup password, CSRF protection (0de1d62)
