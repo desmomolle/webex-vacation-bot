@@ -23,6 +23,7 @@ grouping by [Conventional Commits](https://www.conventionalcommits.org).
 - DEMO_MODE — click through the whole app without real credentials (f1c8fa8)
 - Settings page to edit config after setup (1e56489)
 - Translate UI, README, docs and defaults to English (c1410d6)
+- Move vacation activation + return date to the dashboard (b69ebd2)
 
 ### Security
 - Fernet encryption, setup password, CSRF protection (0de1d62)
