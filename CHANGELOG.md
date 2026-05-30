@@ -17,6 +17,7 @@ Gruppierung nach [Conventional Commits](https://www.conventionalcommits.org).
 - Browser setup wizard, configurable internal domain (4391154)
 - Enable/disable toggle in WebUI, fix status key, README cleanup (d1cc36b)
 - DEMO_MODE — click through the whole app without real credentials (f1c8fa8)
+- Settings page to edit config after setup (1e56489)
 
 ### Security
 - Fernet encryption, setup password, CSRF protection (0de1d62)
