@@ -80,9 +80,9 @@ async def main() -> None:
         setup_pw = "".join(_secrets.choice(alphabet) for _ in range(10))
         os.environ["SETUP_PASSWORD"] = setup_pw
         log.warning("=" * 60)
-        log.warning("SETUP WIZARD PASSWORD (auto-generated): %s", setup_pw)
+        log.warning("ACCESS PASSWORD (auto-generated): %s", setup_pw)
+        log.warning("Use it to log in at http://localhost:8080 (status + setup)")
         log.warning("Set SETUP_PASSWORD=... in .env to use a fixed password")
-        log.warning("Access wizard: http://localhost:8080/setup")
         log.warning("=" * 60)
 
     await db.init_db()

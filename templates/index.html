@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="{{ csrf_token }}" />
   <title>Webex Vacation Bot</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -73,7 +74,11 @@
       btn.disabled = true;
       btn.textContent = '...';
       try {
-        const r = await fetch('/api/toggle', { method: 'POST' });
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+        const r = await fetch('/api/toggle', {
+          method: 'POST',
+          headers: { 'X-CSRF-Token': token },
+        });
         const data = await r.json();
         location.reload();
       } catch(e) {
@@ -229,7 +234,10 @@
   <!-- Footer -->
   <footer class="border-t border-gray-200 bg-white mt-auto">
     <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-      <p class="text-xs text-gray-400">Powered by Webex Vacation Bot</p>
+      <div class="flex items-center gap-4">
+        <a href="/setup" class="text-xs text-gray-400 hover:text-accent-600 transition-colors">Einrichtung</a>
+        <a href="/logout" class="text-xs text-gray-400 hover:text-accent-600 transition-colors">Abmelden</a>
+      </div>
       <p class="text-xs text-gray-300 font-mono">{{ status.last_check or '' }}</p>
     </div>
   </footer>
