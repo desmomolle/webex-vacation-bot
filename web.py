@@ -259,34 +259,30 @@ async def _build_status() -> dict:
 
     end_date      = await db.get_config("end_date") or await db.get_config("vacation_end")
     last_check    = await db.get_config("last_check")
-    vacation_end  = await db.get_config("vacation_end") or end_date
 
-    # Derive the current (open) vacation period from the return date — robust
-    # even when the poll loop hasn't written a config pointer.
+    # The dashboard always shows the most recent vacation phase (active or
+    # just ended). Older phases live on the /history page.
     current_period_id = None
     recent_replies: list[dict] = []
-    if vacation_end:
-        async with aiosqlite.connect(_DB_PATH) as conn:
-            conn.row_factory = aiosqlite.Row
+    async with aiosqlite.connect(_DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        async with conn.execute(
+            "SELECT id FROM vacation_periods ORDER BY id DESC LIMIT 1"
+        ) as cur:
+            row = await cur.fetchone()
+        if row:
+            current_period_id = row["id"]
             async with conn.execute(
-                "SELECT id FROM vacation_periods WHERE end_date = ? AND closed_at IS NULL "
-                "ORDER BY id DESC LIMIT 1",
-                (vacation_end,),
+                """
+                SELECT person_name, person_email, message_preview, replied_at
+                FROM vacation_log
+                WHERE period_id = ?
+                ORDER BY replied_at DESC
+                LIMIT 50
+                """,
+                (current_period_id,),
             ) as cur:
-                row = await cur.fetchone()
-            if row:
-                current_period_id = row["id"]
-                async with conn.execute(
-                    """
-                    SELECT person_name, person_email, message_preview, replied_at
-                    FROM vacation_log
-                    WHERE period_id = ?
-                    ORDER BY replied_at DESC
-                    LIMIT 50
-                    """,
-                    (current_period_id,),
-                ) as cur:
-                    recent_replies = [dict(r) for r in await cur.fetchall()]
+                recent_replies = [dict(r) for r in await cur.fetchall()]
 
     # Optional summary stored as JSON in config
     summary_raw = await db.get_config("summary")
@@ -609,15 +605,18 @@ async def handle_settings_post(request: web.Request) -> web.Response:
 # ---------------------------------------------------------------------------
 
 async def handle_history_get(request: web.Request) -> web.Response:
-    """GET /history — all vacation periods, clustered, each with its reply log."""
+    """GET /history — the *older* vacation periods (the most recent one is shown
+    on the dashboard), each as a collapsible tile with its reply log."""
     async with aiosqlite.connect(_DB_PATH) as conn:
         conn.row_factory = aiosqlite.Row
+        # Exclude the latest period — that one lives on the dashboard.
         async with conn.execute(
             """
             SELECT p.id, p.start_date, p.end_date, p.created_at, p.closed_at,
                    COUNT(l.id) AS reply_count
             FROM vacation_periods p
             LEFT JOIN vacation_log l ON l.period_id = p.id
+            WHERE p.id < (SELECT MAX(id) FROM vacation_periods)
             GROUP BY p.id
             ORDER BY p.id DESC
             """

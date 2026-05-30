@@ -39,14 +39,16 @@
 
   <main class="flex-1 max-w-4xl mx-auto w-full px-6 py-8 space-y-4">
 
+    <p class="text-xs text-gray-400">Earlier vacation phases. The current one is on the <a href="/" class="text-accent-600 hover:underline">dashboard</a>.</p>
+
     {% if not periods %}
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-12 text-center">
-      <p class="text-sm text-gray-400">No vacation periods yet. Activate the bot on the dashboard to start one.</p>
+      <p class="text-sm text-gray-400">No earlier vacation phases yet.</p>
     </div>
     {% endif %}
 
     {% for p in periods %}
-    <details class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden group" {% if loop.first and p.active %}open{% endif %}>
+    <details class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden group">
       <summary class="px-6 py-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50 transition-colors list-none">
         <div class="flex items-center gap-3 min-w-0">
           {% if p.active %}
