@@ -45,6 +45,7 @@ import aiosqlite
 import auth
 import db
 import demo
+import vacation
 
 logger = logging.getLogger(__name__)
 
@@ -256,28 +257,36 @@ async def _build_status() -> dict:
     enabled_val = await db.get_config("vacation_enabled", "false")
     enabled = enabled_val.lower() in ("1", "true", "yes")
 
-    end_date      = await db.get_config("end_date")
+    end_date      = await db.get_config("end_date") or await db.get_config("vacation_end")
     last_check    = await db.get_config("last_check")
-    period_id_str = await db.get_config("current_period_id")
-    current_period_id = int(period_id_str) if period_id_str else None
+    vacation_end  = await db.get_config("vacation_end") or end_date
 
-    # Fetch recent replies for the current period (newest first, cap at 50)
+    # Derive the current (open) vacation period from the return date — robust
+    # even when the poll loop hasn't written a config pointer.
+    current_period_id = None
     recent_replies: list[dict] = []
-    if current_period_id:
+    if vacation_end:
         async with aiosqlite.connect(_DB_PATH) as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
-                """
-                SELECT person_name, person_email, message_preview, replied_at
-                FROM vacation_log
-                WHERE period_id = ?
-                ORDER BY replied_at DESC
-                LIMIT 50
-                """,
-                (current_period_id,),
+                "SELECT id FROM vacation_periods WHERE end_date = ? AND closed_at IS NULL "
+                "ORDER BY id DESC LIMIT 1",
+                (vacation_end,),
             ) as cur:
-                rows = await cur.fetchall()
-                recent_replies = [dict(r) for r in rows]
+                row = await cur.fetchone()
+            if row:
+                current_period_id = row["id"]
+                async with conn.execute(
+                    """
+                    SELECT person_name, person_email, message_preview, replied_at
+                    FROM vacation_log
+                    WHERE period_id = ?
+                    ORDER BY replied_at DESC
+                    LIMIT 50
+                    """,
+                    (current_period_id,),
+                ) as cur:
+                    recent_replies = [dict(r) for r in await cur.fetchall()]
 
     # Optional summary stored as JSON in config
     summary_raw = await db.get_config("summary")
@@ -342,6 +351,14 @@ async def handle_api_vacation(request: web.Request) -> web.Response:
         await db.set_config("end_date", return_date)  # keep status display in sync
 
     await db.set_config("vacation_enabled", "true" if enabled else "false")
+
+    # Manage the vacation period so the history stays clean: activating opens a
+    # period right away (visible immediately), deactivating closes it.
+    if enabled:
+        await vacation.get_or_create_period()
+    else:
+        await vacation.close_open_periods()
+
     return web.json_response({"enabled": enabled, "return_date": return_date})
 
 
@@ -588,6 +605,48 @@ async def handle_settings_post(request: web.Request) -> web.Response:
 
 
 # ---------------------------------------------------------------------------
+# History (past vacation phases)
+# ---------------------------------------------------------------------------
+
+async def handle_history_get(request: web.Request) -> web.Response:
+    """GET /history — all vacation periods, clustered, each with its reply log."""
+    async with aiosqlite.connect(_DB_PATH) as conn:
+        conn.row_factory = aiosqlite.Row
+        async with conn.execute(
+            """
+            SELECT p.id, p.start_date, p.end_date, p.created_at, p.closed_at,
+                   COUNT(l.id) AS reply_count
+            FROM vacation_periods p
+            LEFT JOIN vacation_log l ON l.period_id = p.id
+            GROUP BY p.id
+            ORDER BY p.id DESC
+            """
+        ) as cur:
+            periods = [dict(r) for r in await cur.fetchall()]
+
+        for p in periods:
+            async with conn.execute(
+                """
+                SELECT person_name, person_email, message_preview, replied_at
+                FROM vacation_log WHERE period_id = ?
+                ORDER BY replied_at DESC
+                """,
+                (p["id"],),
+            ) as cur:
+                p["replies"] = [dict(r) for r in await cur.fetchall()]
+            p["active"] = p["closed_at"] is None
+
+    csrf_token = _get_csrf_token(request)
+    response = aiohttp_jinja2.render_template("history.html", request, {
+        "periods": periods,
+        "csrf_token": csrf_token,
+        "demo": demo.is_demo(),
+    })
+    _set_cookie(response, request, "csrf_token", csrf_token, samesite="Strict")
+    return response
+
+
+# ---------------------------------------------------------------------------
 # App factory
 # ---------------------------------------------------------------------------
 
@@ -624,6 +683,9 @@ def create_app() -> web.Application:
     # Settings
     app.router.add_get("/settings", handle_settings_get)
     app.router.add_post("/settings", handle_settings_post)
+
+    # History
+    app.router.add_get("/history", handle_history_get)
 
     return app
 

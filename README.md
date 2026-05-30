@@ -6,7 +6,7 @@ Automatic out-of-office auto-replies for Webex — similar to an email out-of-of
 - Polls your Webex DMs every 15 minutes
 - Replies to each person exactly once per vacation period
 - Automatically distinguishes between internal and external contacts (configurable internal domain)
-- Complete log: who wrote when
+- Complete log per vacation period, clustered into a browsable history — persisted across restarts
 - Automatically disables itself on the return date
 - Bot can be activated/deactivated with a single click — no terminal required
 

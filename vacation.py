@@ -86,6 +86,16 @@ async def get_or_create_period() -> int | None:
         return period_id
 
 
+async def close_open_periods() -> None:
+    """Mark all open vacation periods as closed (used on manual deactivation)."""
+    async with aiosqlite.connect(db.DB_PATH) as conn:
+        await conn.execute(
+            "UPDATE vacation_periods SET closed_at = ? WHERE closed_at IS NULL",
+            (datetime.now(timezone.utc).isoformat(),),
+        )
+        await conn.commit()
+
+
 async def check_vacation_replies() -> dict:
     """Poll Webex for new 1:1 messages and send auto-replies."""
 
