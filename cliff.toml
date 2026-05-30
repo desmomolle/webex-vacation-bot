@@ -42,9 +42,12 @@ commit_parsers = [
   { message = "^chore: update CHANGELOG", skip = true },
   { message = "^chore\\(release\\)", skip = true },
   { message = "^chore", group = "Miscellaneous" },
+  # Catch-all: anything that isn't a known Conventional Commit type is dropped,
+  # so ad-hoc "Topic:"-style subjects don't each become their own section.
+  { message = ".*", skip = true },
 ]
 protect_breaking_commits = false
-filter_commits = false
+filter_commits = true
 tag_pattern = "v[0-9].*"
 topo_order = false
 sort_commits = "oldest"
