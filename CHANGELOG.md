@@ -26,6 +26,7 @@ grouping by [Conventional Commits](https://www.conventionalcommits.org).
 - Move vacation activation + return date to the dashboard (b69ebd2)
 - Vacation history clustered by phase + fix current-period wiring (9bf8790)
 - Dashboard shows the latest phase, history shows older phases only (77f8a60)
+- Prebuilt multi-arch image + portable deployment (3c3e26a)
 
 ### Security
 - Fernet encryption, setup password, CSRF protection (0de1d62)
