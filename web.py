@@ -317,14 +317,32 @@ async def handle_health(request: web.Request) -> web.Response:
     return web.Response(text="ok")
 
 
-async def handle_api_toggle(request: web.Request) -> web.Response:
-    """POST /api/toggle — flip vacation_enabled on/off (CSRF-protected)."""
+async def handle_api_vacation(request: web.Request) -> web.Response:
+    """POST /api/vacation — set the return date and activate/deactivate the
+    auto-reply (CSRF-protected). This is the recurring control on the dashboard;
+    the one-time setup wizard no longer handles it.
+
+    JSON body: {"enabled": bool, "return_date": "YYYY-MM-DD"}
+    """
     if not _validate_csrf(request, request.headers.get("X-CSRF-Token", "")):
         return web.json_response({"error": "csrf"}, status=403)
-    current = await db.get_config("vacation_enabled", "false")
-    new_enabled = current.lower() not in ("1", "true", "yes")
-    await db.set_config("vacation_enabled", "true" if new_enabled else "false")
-    return web.json_response({"enabled": new_enabled})
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({"error": "invalid body"}, status=400)
+
+    enabled = bool(data.get("enabled"))
+    return_date = (data.get("return_date") or "").strip()
+
+    if enabled and not return_date:
+        return web.json_response({"error": "return_date required to activate"}, status=400)
+
+    if return_date:
+        await db.set_config("vacation_end", return_date)
+        await db.set_config("end_date", return_date)  # keep status display in sync
+
+    await db.set_config("vacation_enabled", "true" if enabled else "false")
+    return web.json_response({"enabled": enabled, "return_date": return_date})
 
 
 # ---------------------------------------------------------------------------
@@ -456,12 +474,13 @@ async def handle_setup_step2_post(request: web.Request) -> web.Response:
     if not _validate_csrf(request, data.get("csrf_token", "")):
         return web.Response(status=403, text="CSRF validation failed")
 
+    # One-time reply configuration only. The return date and activation are
+    # set later on the dashboard (POST /api/vacation), so the wizard never has
+    # to be re-run when going on vacation.
     fields = {
-        "vacation_end": data.get("vacation_end", "").strip(),
         "internal_domain": data.get("internal_domain", "cisco.com").strip() or "cisco.com",
         "vacation_message_internal": data.get("vacation_message_internal", "").strip(),
         "vacation_message_external": data.get("vacation_message_external", "").strip(),
-        "vacation_enabled": "true",
     }
 
     for key, value in fields.items():
@@ -546,12 +565,10 @@ async def handle_settings_post(request: web.Request) -> web.Response:
     if not _validate_csrf(request, data.get("csrf_token", "")):
         return web.Response(status=403, text="CSRF validation failed")
 
-    # Required fields — only overwrite when a non-empty value is provided
-    vacation_end = data.get("vacation_end", "").strip()
-    if vacation_end:
-        await db.set_config("vacation_end", vacation_end)
-        await db.set_config("end_date", vacation_end)  # keep status display in sync
+    # Note: the return date and activation live on the dashboard
+    # (POST /api/vacation), not here — Settings is one-time configuration only.
 
+    # Required fields — only overwrite when a non-empty value is provided
     for key in ("internal_domain", "vacation_message_internal", "vacation_message_external"):
         val = data.get(key, "").strip()
         if val:
@@ -591,7 +608,7 @@ def create_app() -> web.Application:
     app.router.add_get("/", handle_index)
     app.router.add_get("/api/status", handle_api_status)
     app.router.add_get("/health", handle_health)
-    app.router.add_post("/api/toggle", handle_api_toggle)
+    app.router.add_post("/api/vacation", handle_api_vacation)
 
     # Setup wizard routes
     app.router.add_get("/setup", handle_setup_get)

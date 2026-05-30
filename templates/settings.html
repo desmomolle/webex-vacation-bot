@@ -48,15 +48,10 @@
     <form method="POST" action="/settings" class="space-y-6">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
-      <!-- Vacation -->
+      <!-- General -->
       <section class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Vacation</h2>
-        <div>
-          <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="vacation_end">Return date</label>
-          <input id="vacation_end" name="vacation_end" type="date" value="{{ config.vacation_end or config.end_date or '' }}"
-            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none text-sm" />
-          <p class="mt-1 text-xs text-gray-400">The bot deactivates itself automatically on this day.</p>
-        </div>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">General</h2>
+        <p class="text-xs text-gray-400">The return date and activation live on the <a href="/" class="text-accent-600 hover:underline">dashboard</a> — set them there whenever you go on vacation.</p>
         <div>
           <label class="block text-xs text-gray-500 uppercase tracking-wide font-medium mb-1" for="internal_domain">Internal domain</label>
           <input id="internal_domain" name="internal_domain" type="text" value="{{ config.internal_domain or 'cisco.com' }}"

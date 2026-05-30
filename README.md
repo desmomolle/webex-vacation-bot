@@ -99,9 +99,13 @@ if you prefer a fixed password.
 
 The wizard guides you through:
 1. Authorize Webex (browser sign-in, one-time)
-2. Vacation configuration (return date, reply templates, internal domain)
+2. Reply settings (internal domain, reply templates)
 3. Optional settings (email report, AI summary)
-4. Summary & start the bot
+4. Summary
+
+**The setup is one-time.** The bot can then run permanently (e.g. on a NAS).
+Whenever you go on vacation, you set your **return date** and **activate** the
+auto-reply right on the dashboard — no need to re-run the wizard.
 
 **Done.** Status and controls at [http://localhost:8080](http://localhost:8080).
 
@@ -110,9 +114,11 @@ The wizard guides you through:
 ## Controlling the bot
 
 **Via browser:**
-`http://localhost:8080` → click **"Deactivate"** or **"Activate"** — no terminal required.
+On the dashboard at `http://localhost:8080`, pick your **return date** ("Vacation until")
+and click **"Activate"**. Click **"Deactivate"** to stop early. No terminal required.
 
-The bot also automatically disables itself on the configured return date.
+The bot also **automatically disables itself** once the return date has passed — the
+next poll closes the vacation period and stops replying.
 
 **Stop the container** (shut down completely):
 ```bash
@@ -255,7 +261,7 @@ docker logs webex-vacation-bot 2>&1 | grep "ACCESS PASSWORD"
 → Client ID or Client Secret is wrong. Copy the values from developer.webex.com again and re-enter them in the wizard.
 
 **Status page always shows "Inactive"**
-→ In wizard step 2, check whether the vacation configuration was saved, or click the Activate button directly at `http://localhost:8080`.
+→ On the dashboard, pick a return date and click **Activate**. The bot stays inactive until you do.
 
 **The bot does not reply to test messages**
 → Messages must be 1:1 DMs (no group rooms). Check the logs: `docker logs webex-vacation-bot`.

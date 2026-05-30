@@ -105,7 +105,7 @@
               <span class="text-gray-400 text-xs font-bold">2</span>
             </span>
             {% endif %}
-            <span class="text-xs {% if s2 == 'active' %}text-accent-600 font-semibold{% elif s2 == 'done' %}text-emerald-600 font-medium{% else %}text-gray-400{% endif %} whitespace-nowrap hidden sm:block">Vacation</span>
+            <span class="text-xs {% if s2 == 'active' %}text-accent-600 font-semibold{% elif s2 == 'done' %}text-emerald-600 font-medium{% else %}text-gray-400{% endif %} whitespace-nowrap hidden sm:block">Replies</span>
           </div>
           <div class="flex-1 h-0.5 mx-2 {% if s2 == 'done' %}bg-emerald-400{% else %}bg-gray-200{% endif %}"></div>
         </li>
@@ -271,25 +271,13 @@
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 class="text-base font-semibold text-gray-800">Step 2 — Vacation configuration</h2>
-        <p class="text-sm text-gray-500 mt-0.5">When are you away and what should people hear?</p>
+        <h2 class="text-base font-semibold text-gray-800">Step 2 — Reply settings</h2>
+        <p class="text-sm text-gray-500 mt-0.5">Who counts as internal, and what should people hear?</p>
       </div>
 
       <div class="px-6 py-5">
         <form method="POST" action="/setup/step2" class="space-y-5">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-
-          <!-- Vacation End Date -->
-          <div>
-            <label for="vacation_end" class="block text-sm font-medium text-gray-700 mb-1">Return date</label>
-            <input type="date"
-                   id="vacation_end"
-                   name="vacation_end"
-                   value="{{ config.get('vacation_end', '') }}"
-                   required
-                   class="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition" />
-            <p class="mt-1 text-xs text-gray-400">After this date the bot will stop replying.</p>
-          </div>
 
           <!-- Internal Domain -->
           <div>
@@ -552,16 +540,12 @@
     <!-- Two-column summary grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-      <!-- Vacation configuration -->
+      <!-- Reply settings -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-100 bg-gray-50">
-          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Vacation configuration</h2>
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Reply settings</h2>
         </div>
         <div class="px-5 py-4 space-y-3">
-          <div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Return date</p>
-            <p class="text-sm font-medium text-gray-800">{{ config.get('vacation_end', '—') }}</p>
-          </div>
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Internal domain</p>
             <p class="text-sm font-medium text-gray-800">
@@ -590,7 +574,7 @@
       <!-- E-Mail -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-100 bg-gray-50">
-          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">E-Mail-Report</h2>
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Email report</h2>
         </div>
         <div class="px-5 py-4 space-y-3">
           <div>
@@ -643,7 +627,7 @@
       <!-- Poll-Intervall -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-100 bg-gray-50">
-          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Poll-Intervall</h2>
+          <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Poll interval</h2>
         </div>
         <div class="px-5 py-4">
           <p class="text-sm font-medium text-gray-800">
@@ -661,20 +645,21 @@
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        Bot is ready — show status
+        Setup complete — go to dashboard
       </a>
-      <a href="/setup"
+      <a href="/settings"
          class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white hover:bg-gray-50 text-gray-600 text-sm font-medium rounded-lg border border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        Change settings
+        Edit settings
       </a>
     </div>
 
     <p class="text-xs text-gray-400 text-center mt-4">
-      Setup access is password-protected. Tokens are stored encrypted.
+      Setup is one-time. When you go on vacation, set your return date and
+      activate the auto-reply on the dashboard. Tokens are stored encrypted.
     </p>
     {% endif %}
 
