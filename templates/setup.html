@@ -29,6 +29,12 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
 
+  {% if demo %}
+  <div class="bg-amber-400 text-amber-950 text-center text-xs font-semibold py-1.5 tracking-wide">
+    DEMO-MODUS — „Bei Webex autorisieren" wird simuliert, es werden keine echten Tokens geholt
+  </div>
+  {% endif %}
+
   <!-- Header -->
   <header class="bg-white border-b border-gray-200 shadow-sm">
     <div class="max-w-2xl mx-auto px-6 py-4 flex items-center gap-3">

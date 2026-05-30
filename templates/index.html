@@ -30,6 +30,12 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
 
+  {% if demo %}
+  <div class="bg-amber-400 text-amber-950 text-center text-xs font-semibold py-1.5 tracking-wide">
+    DEMO-MODUS — keine echten Webex-Aufrufe, alle Daten sind Beispieldaten
+  </div>
+  {% endif %}
+
   <!-- Header -->
   <header class="bg-white border-b border-gray-200 shadow-sm">
     <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">

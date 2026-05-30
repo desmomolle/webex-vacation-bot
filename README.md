@@ -26,6 +26,27 @@ Automatische Abwesenheitsantworten für Webex — ähnlich einer E-Mail-Abwesenh
 
 ---
 
+## ⚡ Sofort ausprobieren (Demo-Modus)
+
+Den ganzen Bot durchklicken — **ohne Webex-Account, ohne Registrierung, ohne Credentials**:
+
+```bash
+git clone https://github.com/desmomolle/webex-vacation-bot.git
+cd webex-vacation-bot
+docker compose run --rm -e DEMO_MODE=true -p 8080:8080 webex-vacation-bot
+```
+
+Dann **[http://localhost:8080](http://localhost:8080)** öffnen, Passwort: **`demo`**.
+
+Im Demo-Modus werden **keine** echten Webex-/Mail-/LLM-Aufrufe gemacht. Stattdessen:
+- Beispiel-Protokoll wird vorbefüllt,
+- der „Bei Webex autorisieren"-Schritt im Wizard wird simuliert (du kannst ihn komplett durchklicken),
+- alle paar Sekunden „kommt" eine neue Demo-Nachricht rein, sodass sich das Protokoll live füllt.
+
+![Demo-Modus](docs/screenshot-demo.png)
+
+---
+
 ## Schnellstart
 
 > **Tipp für Synology/QNAP:** Schritt 3 entfällt — alles im Browser. Kein Terminal nötig.

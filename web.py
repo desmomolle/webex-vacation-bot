@@ -44,6 +44,7 @@ from aiohttp import web
 import aiosqlite
 import auth
 import db
+import demo
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +205,8 @@ async def handle_login_get(request: web.Request) -> web.Response:
     csrf_token = _get_csrf_token(request)
     nxt = request.rel_url.query.get("next", "/")
     response = aiohttp_jinja2.render_template(
-        "login.html", request, {"csrf_token": csrf_token, "next": nxt, "error": None},
+        "login.html", request,
+        {"csrf_token": csrf_token, "next": nxt, "error": None, "demo": demo.is_demo()},
     )
     _set_cookie(response, request, "csrf_token", csrf_token, samesite="Strict")
     return response
@@ -226,7 +228,8 @@ async def handle_login_post(request: web.Request) -> web.Response:
         csrf_token = _get_csrf_token(request)
         response = aiohttp_jinja2.render_template(
             "login.html", request,
-            {"csrf_token": csrf_token, "next": nxt, "error": "Falsches Passwort."},
+            {"csrf_token": csrf_token, "next": nxt, "error": "Falsches Passwort.",
+             "demo": demo.is_demo()},
         )
         response.set_status(401)
         _set_cookie(response, request, "csrf_token", csrf_token, samesite="Strict")
@@ -299,7 +302,7 @@ async def handle_index(request: web.Request) -> web.Response:
     status = await _build_status()
     csrf_token = _get_csrf_token(request)
     response = aiohttp_jinja2.render_template(
-        "index.html", request, {"status": status, "csrf_token": csrf_token},
+        "index.html", request, {"status": status, "csrf_token": csrf_token, "demo": demo.is_demo()},
     )
     _set_cookie(response, request, "csrf_token", csrf_token, samesite="Strict")
     return response
@@ -330,7 +333,7 @@ async def handle_api_toggle(request: web.Request) -> web.Response:
 
 def _render_setup(request: web.Request, ctx: dict) -> web.Response:
     csrf_token = _get_csrf_token(request)
-    ctx = {**ctx, "csrf_token": csrf_token}
+    ctx = {**ctx, "csrf_token": csrf_token, "demo": demo.is_demo()}
     response = aiohttp_jinja2.render_template("setup.html", request, ctx)
     _set_cookie(response, request, "csrf_token", csrf_token, samesite="Strict")
     return response
@@ -361,6 +364,12 @@ async def handle_setup_step1_post(request: web.Request) -> web.Response:
 
 async def handle_setup_webex_auth(request: web.Request) -> web.Response:
     """GET /setup/webex/auth — redirect browser to Webex OAuth consent page."""
+    if demo.is_demo():
+        # Skip the real Webex round-trip: write fake tokens and continue.
+        demo.stub_tokens()
+        logger.info("DEMO: Webex OAuth stubbed, fake tokens written")
+        raise web.HTTPFound("/setup/step2")
+
     client_id = await db.get_config("webex_client_id", "")
     base_url = _get_base_url(request)
     redirect_uri = f"{base_url}/setup/webex/callback"

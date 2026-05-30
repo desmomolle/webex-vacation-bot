@@ -16,6 +16,12 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex items-center justify-center px-4">
 
+  {% if demo %}
+  <div class="fixed top-0 inset-x-0 bg-amber-400 text-amber-950 text-center text-xs font-semibold py-1.5 tracking-wide">
+    DEMO-MODUS — Passwort: <span class="font-mono">demo</span>
+  </div>
+  {% endif %}
+
   <div class="w-full max-w-sm">
     <div class="flex items-center justify-center gap-3 mb-6">
       <div class="w-9 h-9 bg-accent-600 rounded-lg flex items-center justify-center">

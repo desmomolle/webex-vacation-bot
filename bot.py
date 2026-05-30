@@ -12,6 +12,7 @@ import signal
 
 import db
 import auth
+import demo
 import vacation
 import web as web_server
 
@@ -26,6 +27,18 @@ POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", "15")) * 60  # seconds
 
 async def _poll_loop() -> None:
     """Run vacation.check_vacation_replies() on a fixed interval."""
+    if demo.is_demo():
+        log.info("Poll loop in DEMO mode — simulating incoming every %ds", demo.DEMO_POLL_SECONDS)
+        while True:
+            try:
+                result = await demo.simulate_incoming()
+                log.info("Demo poll result: %s", result)
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                log.exception("Demo poll error: %s", exc)
+            await asyncio.sleep(demo.DEMO_POLL_SECONDS)
+
     log.info("Poll loop started — interval: %d min", POLL_INTERVAL // 60)
     while True:
         try:
@@ -72,6 +85,9 @@ async def main() -> None:
     import crypto
     crypto.load_or_create_key()  # ensure key exists, logs if newly created
 
+    if demo.is_demo():
+        os.environ.setdefault("SETUP_PASSWORD", "demo")
+
     setup_pw = os.getenv("SETUP_PASSWORD", "")
     if not setup_pw:
         import secrets as _secrets
@@ -86,6 +102,13 @@ async def main() -> None:
         log.warning("=" * 60)
 
     await db.init_db()
+
+    if demo.is_demo():
+        await demo.seed_demo_data()
+        log.warning("=" * 60)
+        log.warning("DEMO MODE active — no real Webex/mail/LLM calls, sample data only")
+        log.warning("Login at http://localhost:8080  (password: %s)", os.environ["SETUP_PASSWORD"])
+        log.warning("=" * 60)
 
     loop = asyncio.get_running_loop()
     stop_event = asyncio.Event()
