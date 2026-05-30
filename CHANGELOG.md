@@ -5,6 +5,9 @@ Format nach [Keep a Changelog](https://keepachangelog.com),
 Gruppierung nach [Conventional Commits](https://www.conventionalcommits.org).
 ## [unreleased]
 
+### Bug Fixes
+- Unclosed {% if step == "summary" %} in setup.html caused 500 on /setup (ca285e7)
+
 ### CI/CD
 - Auto-changelog via git-cliff reusable workflow (d8a3e84)
 - Inline changelog workflow (public repo can't call private reusable) (3ba7f98)
